@@ -1,0 +1,8 @@
+# Path to downloaded vicon SDK module 
+vicon_sdk_path: 'C:\Program Files\Vicon\DataStream SDK\Win64\Python'
+
+# Hot keys which the pedals are mapped to
+keys:
+  start: 'r'
+  stop: 'e'
+  save: 's'
