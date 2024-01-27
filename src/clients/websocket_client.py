@@ -18,12 +18,12 @@ class WebSocketClient:
     def retrieve_next_gloss(self):
         raise NotImplementedError
 
-# Usage example
-async def main():
-    client = WebSocketClient("https://www.gomerotterspeer.nl/Gebarenoverleg/lijst.html")
-    data = await client.connect()
-    print(data)
+if __name__ == "__main__":
+    async def main():
+        client = WebSocketClient("https://www.gomerotterspeer.nl/Gebarenoverleg/lijst.html")
+        data = await client.connect()
+        print(data)
 
-# Run the asyncio event loop
-asyncio.run(main())
+    # Run the asyncio event loop
+    asyncio.run(main())
 

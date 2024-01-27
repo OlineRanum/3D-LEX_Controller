@@ -11,20 +11,22 @@ class ViconController:
         print('Vicon Import OK')   
 
         client = ViconDataStream.Client()
-        frames = []
-        
-        print( 'Connecting' )
-        while not client.IsConnected():
-            print( '.' )
-            client.Connect( 'localhost:801' )
-        
-        try:
-            while client.IsConnected():
-                if client.GetFrame():
-                    #store data here
-                    frames.append(client.GetFrameNumber() )
-        
-        except ViconDataStream.DataStreamException as e:
-            print( 'Error', e )
-        
-        return frames
+
+        def collect_data(self):
+            frames = []
+            
+            print( 'Connecting' )
+            while not client.IsConnected():
+                print( '.' )
+                client.Connect( 'localhost:801' )
+            
+            try:
+                while client.IsConnected():
+                    if client.GetFrame():
+                        #store data here
+                        frames.append(client.GetFrameNumber() )
+            
+            except ViconDataStream.DataStreamException as e:
+                print( 'Error', e )
+            
+            return frames
