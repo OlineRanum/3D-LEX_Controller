@@ -17,7 +17,7 @@ _Instructions in development..._
 - Proceed to set local vicon path in yaml file
 - start Vicon application (shogun) 
 
-![Pipeline](/img/pipeline.jpg)
+![Pipeline](/img/pipeline.png)
 
 
 TODO: 
