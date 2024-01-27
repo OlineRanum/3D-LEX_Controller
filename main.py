@@ -1,5 +1,5 @@
-from src.config.configure_utils import SetUp
-from src.hotkey_controler import Controller
+from src.config.setup import SetUp
+from src.controler import Controller
 
 if __name__ == "__main__":
     args = SetUp("config/config.yaml")
