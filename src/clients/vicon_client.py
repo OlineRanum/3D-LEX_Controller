@@ -1,32 +1,17 @@
-from __future__ import print_function
-from vicon_dssdk import ViconDataStream
-import argparse
-import sys
+from vicon_core_api import *
+from shogun_live_api import *
 
 class ViconController:
     def __init__(self):
-        parser = argparse.ArgumentParser()
-        parser.add_argument('host', nargs='?', help="Host name, in the format of server:port", default = "localhost:801")
-        args = parser.parse_args()
-        print('Vicon Import OK')   
+        shogunLiveClient = Client('localhost')
+        self.capture = CaptureServices(shogunLiveClient)
+        
+        def set_filename(self, filename):
+            self.capture.capture_name(filename)
+            
+        def start_capture(self):    
+            self.capture.start_capture()
 
-        client = ViconDataStream.Client()
-
-        def collect_data(self):
-            frames = []
+        def stop_capture(self):
+            self.capture.set_capture()
             
-            print( 'Connecting' )
-            while not client.IsConnected():
-                print( '.' )
-                client.Connect( 'localhost:801' )
-            
-            try:
-                while client.IsConnected():
-                    if client.GetFrame():
-                        #store data here
-                        frames.append(client.GetFrameNumber() )
-            
-            except ViconDataStream.DataStreamException as e:
-                print( 'Error', e )
-            
-            return frames
