@@ -1,7 +1,7 @@
 from vicon_core_api import *
 from shogun_live_api import *
 
-class ViconController:
+class ViconClient:
     def __init__(self):
         shogunLiveClient = Client('localhost')
         self.capture = CaptureServices(shogunLiveClient)
