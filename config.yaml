@@ -1,11 +1,12 @@
-# Path to downloaded vicon SDK module 
-vicon_sdk_path: 'C:\Program Files\Vicon\DataStream SDK\Win64\Python'
-
 # Hot keys which the pedals are mapped to
 keys:
   start: 'r'
   stop: 'e'
   save: 's'
+
+# Path to the folder where the data is saved
+output_dir: output
+
 
 
 # Shogun
@@ -15,5 +16,11 @@ shogun_hostname:  'localhost'
 llf_udp_ip: '192.168.0.208'
 llf_udp_port: 8000
 
-llf_ip: '145.100.134.165'
-llf_port: 6000
+# Local computer 
+target_ip: '145.100.134.165'
+target_port: 6000
+
+
+
+# Path to downloaded vicon SDK module 
+vicon_sdk_path: 'C:\Program Files\Vicon\DataStream SDK\Win64\Python'
