@@ -1,7 +1,7 @@
 from pynput import keyboard
-from clients.vicon import ViconClient
-from clients.websocket_client import WebSocketClient
-from clients.filemanager import FileManager
+from utils.vicon import ViconClient
+from utils.websocket_client import WebSocketClient
+from utils.filemanager import FileManager
 
 
 class Controller:
