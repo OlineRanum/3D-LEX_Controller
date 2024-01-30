@@ -16,4 +16,10 @@ class ShogunClient:
 
         def stop_capture(self):
             self.capture.set_capture()
+        
+        def save_capture(self, filename):
+            # TODO: talk to Jari about this 
+            # Does shogun save at a spesific location 
+            # Do we just move it 
+            raise NotImplementedError
             
