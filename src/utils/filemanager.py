@@ -31,9 +31,9 @@ class FileManager:
         if not os.path.exists(directory_path):
             os.makedirs(directory_path)
             print(f"Directory '{directory_path}' created successfully.")
-        else:
-            if subdir:
-                self.prompt_yes_no(directory_path)
+        #else:
+            #if subdir:
+                #self.prompt_yes_no(directory_path)
 
  
     def prompt_yes_no(self, directory_path):

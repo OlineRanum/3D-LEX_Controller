@@ -1,6 +1,7 @@
 from pynput import keyboard
-from src.utils.vicon import ShogunClient
-from src.utils.websocket_client import WebSocketClient
+from asyncio import run
+#from src.utils.vicon import ShogunClient
+#from src.utils.websocket_client import WebSocketClient
 from src.utils.filemanager import FileManager
 from src.utils.livelinkface import LiveLinkFaceClient, LiveLinkFaceServer
 
@@ -33,14 +34,14 @@ class Controller:
         self.file_manager.create_directory(self.args.output_dir + '/' + self.gloss, subdir = True)
 
         # Interactions with Vicon Shogun
-        self.vc = ShogunClient(self.args, self.gloss)
+        #self.vc = ShogunClient(self.args, self.gloss)
 
         # Interactions with HandEngine
         # Currently controlled through integrations in shogun live
 
         # Interactions with Live Link Face / iPhone AR Kit
         self.llfc = LiveLinkFaceClient(self.args, self.gloss) 
-        self.llfs = LiveLinkFaceServer(self.args) 
+        
         
         # File Counter  
         # We do it like this to not have to search through all files in a directory 
@@ -62,11 +63,11 @@ class Controller:
                 
                 print('{0}: start recording'.format(key.char))
                 # Trigger vicon to start recording
-                self.vc.start_capture()
+                #self.vc.start_capture()
                 # Hand engine automatically triggered if trigger congifured in shogun live
 
                 # Trigger LLF to start recording
-                self.llfc.start_capture()
+                self.takenumber = self.llfc.start_capture()
 
                 self.file_counter = 1
 
@@ -77,7 +78,7 @@ class Controller:
                 print('{0}: stop recording'.format(key.char))
                 # Trigger vicon to stop recording
                 # Hand engine automatically triggered if trigger congifured in shogun live
-                self.vc.stop_capture()
+                #self.vc.stop_capture()
 
                 # Trigger LLF to stop recording
                 self.llfc.stop_capture()
@@ -87,25 +88,27 @@ class Controller:
             #--------------------------------------------
             elif key.char == self.args.save_key:
                 print('{0}: save recording'.format(key.char))
+                self.llfc.request_battery()
                 # Save recording in vicon
-                self.vc.save_capture(self.gloss)
+                #self.vc.save_capture(self.gloss)
                 
                 # Export recording from LLF to computer 
-                self.llfs.export_capture(self.gloss)
+                
 
                 # collect an pickle data
-                self.file_manager.export_pickle(self.gloss)
+                #self.file_manager.export_pickle(self.gloss)
 
                 # Request next gloss from Gebarenoverleg platform
                 #self.gloss = self.wsc.request_next_gloss()
 
                 # TODO: build directory
-                self.file_manager.create_directory(self.args.output_dir + '/' + self.gloss)
+                #self.file_manager.create_directory(self.args.output_dir + '/' + self.gloss)
                 
-                
+                #self.llfc.save_file()
                 # Set the filename to the next gloss
-                self.vc.set_filename(self.gloss)
-                self.llfc.set_filename(self.gloss)
+                #self.vc.set_filename(self.gloss)
+                #self.llfc.set_filename(self.gloss)
+                
 
                 # reset file_counter
                 self.file_counter = 0
@@ -137,6 +140,3 @@ class Controller:
 
 
 
-if __name__ == "__main__":
-    recorder = Controller('../config/config.yaml')
-    recorder.start()
