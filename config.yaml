@@ -12,5 +12,8 @@ keys:
 shogun_hostname:  'localhost'
 
 # Live Link Face
+llf_udp_ip: '192.168.0.208'
+llf_udp_port: 8000
+
 llf_ip: '145.100.134.165'
 llf_port: 6000
