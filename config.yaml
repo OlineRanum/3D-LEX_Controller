@@ -8,5 +8,9 @@ keys:
   save: 's'
 
 
-# Shogun ip
+# Shogun
 shogun_hostname:  'localhost'
+
+# Live Link Face
+llf_ip: '145.100.134.165'
+llf_port: 6000
