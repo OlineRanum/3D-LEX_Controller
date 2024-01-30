@@ -13,14 +13,20 @@ class Controller:
         )
 
         self.args = args
+
         # For managing and cleaning up files
         self.file_manager = FileManager()
 
+        # TODO: Set up websocket client for Gomer
         # Interactions with Gebarenoverleg platform
-        self.wsc  = WebSocketClient()
+        #self.wsc  = WebSocketClient()
 
         # Issue request to ws to display first gloss
-        self.gloss = self.wsc.retrieve_next_gloss()
+        #self.gloss = self.wsc.retrieve_next_gloss()
+
+        # TODO: Remove
+        # For testing 
+        self.gloss = "testgloss"
 
         # Interactions with Vicon Shogun
         self.vc = ShogunClient(self.args, self.gloss)
