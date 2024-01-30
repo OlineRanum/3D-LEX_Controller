@@ -6,3 +6,7 @@ keys:
   start: 'r'
   stop: 'e'
   save: 's'
+
+
+# Shogun ip
+shogun_hostname:  'localhost'

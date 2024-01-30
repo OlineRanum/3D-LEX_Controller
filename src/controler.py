@@ -1,5 +1,5 @@
 from pynput import keyboard
-from utils.vicon import ViconClient
+from utils.vicon import ShogunClient
 from utils.websocket_client import WebSocketClient
 from utils.filemanager import FileManager
 
@@ -13,13 +13,18 @@ class Controller:
         )
 
         self.args = args
+        # For managing and cleaning up files
         self.file_manager = FileManager()
-        self.wsc  = WebSocketClient()
-        self.vc = ViconClient()
 
-        # Set the filename to the first gloss
-        self.vc.set_filename(self.gloss)
-    
+        # Interactions with Gebarenoverleg platform
+        self.wsc  = WebSocketClient()
+
+        # Issue request to ws to display first gloss
+        self.gloss = self.wsc.retrieve_next_gloss()
+
+        # Interactions with Vicon Shogun
+        self.vc = ShogunClient(self.args, self.gloss)
+
         
         # File Counter  
         # We do it like this to not have to search through all files in a directory 
@@ -27,8 +32,7 @@ class Controller:
         self.file_counter = 0
 
 
-        # Issue request to ws to display next gloss
-        self.gloss = self.wsc.retrieve_next_gloss()
+
         
 
     def __on_press(self, key):
