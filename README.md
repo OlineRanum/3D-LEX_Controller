@@ -3,31 +3,19 @@
 _Instructions in development..._
 
 ### Setting up environment
+Install requirements
+    pip install -r setup/requirements.txt
 
-    conda env create -f setup/env.yml
-    conda activate data_acquisition
 
-
-### Installing Vicon Datastream SDK
-
-[See Installation Guide here](https://docs.vicon.com/display/DSSDK111/Vicon+DataStream+SDK+Quick+Start+Guide+for+Python)
-
-[Download the Datastream SDK software here](https://www.vicon.com/software/datastream-sdk/)
-
-- Proceed to set local vicon path in yaml file
-- start Vicon application (shogun) 
+### Current Pipeline
 
 ![Pipeline](/img/pipeline.png)
 
 
-TODO: 
-- Program pedal and connect to hot keys
-- Read hot keys from yaml file 
-- connect Client to output 
-- make main file 
-- how to integrate with handengine 
+### Current todos 
+[9:36 AM] Oline Ranum
+- Decide on the output file format for mocap 
+- Fix server for automatically loading files from iphone 
+- Make code to collect files from all systems and pickle them
+- Make a batching system to feed files from Shogun Live into Post 
 
-Notes 
-- The facewear and hand engine systems are integrated with Vicon 
-- so the pedal can issue commands to shogun and this script simultaneously
-- can we then store the data directly from hand engine in a list 
