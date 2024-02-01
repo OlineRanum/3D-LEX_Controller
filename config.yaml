@@ -4,6 +4,7 @@ keys:
   stop: 'e'
   save: 's'
   battery: 'b'
+  quit: 'q'
 
 # Path to the folder where the data is saved
 output_dir: output

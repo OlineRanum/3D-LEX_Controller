@@ -37,10 +37,10 @@ class LiveLinkFaceClient:
         self.takenumber = 0
     
     def request_battery(self):
+        print("requestbattery INSIDE func")
         self.client.send_message("/BatteryQuery", [])
 
     def save_file(self, timecode, blendshapeCSV, referenceMOV, *args):
-        # print(f"{args}")
         print("send the transport towards - " + self.args.target_ip + ':' + str(self.args.target_port))
         print(timecode, blendshapeCSV, referenceMOV, *args)
         # Ask our client to send a transport message to our server 
@@ -64,9 +64,9 @@ class LiveLinkFaceServer:
         self.dispatcher.map("/RecordStopConfirm", controller.llfc.save_file)
         self.dispatcher.set_default_handler(self.default)
 
-        # Launch Server
-        run(self.init_server(controller))
-        
+        # # Launch Server
+        # self.init_server(controller)
+
 
     # Server async launch code and close code, serving on target ip and port
     async def init_server(self, controller):

@@ -8,7 +8,8 @@ if __name__ == "__main__":
     args = SetUp("config.yaml")
     controller = Controller(args)
     server = LiveLinkFaceServer(controller)
-    
+    # Launch Server
+    run(server.init_server(controller))
         
 
     
