@@ -1,13 +1,9 @@
 from pythonosc.udp_client import SimpleUDPClient
 from pythonosc.dispatcher import Dispatcher
-from asyncio import run 
-import os 
 from pythonosc.osc_server import BlockingOSCUDPServer
 import sys
 
 # Class LiveLinkFaceClient sends messages to the live link server on the IPhone
-# Sometimes it will be requested to save the file by the python server, and other times
-# it will be requested to send messages by the IO
 class LiveLinkFaceClient:
     # The init starts the client and sets the python server address on the IPhone
     def __init__(self, args, gloss):
@@ -29,7 +25,6 @@ class LiveLinkFaceClient:
     def stop_capture(self, *args):
         self.toIphone.send_message("/RecordStop", [])
         self.takenumber += 1
-        # self.save_file()
 
     def set_filename(self, gloss, *args):
         self.gloss = gloss
@@ -55,13 +50,12 @@ class LiveLinkFaceServer:
     def __init__(self, gloss, args):
         self.gloss = gloss
         self.args = args
-
         self.client = LiveLinkFaceClient(args, gloss)
 
         # Start server rules here, add a default rule for all other incoming messages
         self.dispatcher = Dispatcher()
         self.dispatcher.map("/OSCSetSendTargetConfirm", print)
-        self.dispatcher.map("/QuitServer", self.quitServer)
+        self.dispatcher.map("/QuitServer", self.quit_server)
 
         # Start client requests here
         self.dispatcher.map("/SetFileName", self.client.set_filename)
@@ -70,8 +64,8 @@ class LiveLinkFaceServer:
         # When the recording is fully finished, instruct the client to save the file locally
         self.dispatcher.map("/RecordStopConfirm", self.client.save_file)
 
+        # What to do with unknown messages
         self.dispatcher.set_default_handler(self.default)
-
 
     # Server launch code, serving on target ip and port
     def init_server(self):
@@ -79,19 +73,9 @@ class LiveLinkFaceServer:
         self.server = BlockingOSCUDPServer((self.args.target_ip, self.args.target_port), self.dispatcher)
         self.server.serve_forever()
 
-    # Server functions start here
-    def requestClientSaveFile(self, timecode, blendshapeCSV, referenceMOV, *args):
-        self.client.save_file(timecode, blendshapeCSV, referenceMOV, args)
-
     # Exit the server and client through the /QuitServer handle
-    def quitServer(self, *args):
+    def quit_server(self, *args):
         sys.exit()
-    
-    def requestClientRecordStart(self, *args):
-        self.client.start_capture()
-            
-    def requestClientRecordStop(self, *args):
-        self.client.stop_capture()
 
     # Print all messages by default
     def default(self, address, *args):
