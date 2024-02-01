@@ -40,11 +40,12 @@ class LiveLinkFaceClient:
         print('request battery')
         self.client.send_message("/BatteryQuery", [])
 
-    def save_file(self, *args):
-        print(f"{args}")
-        self.client.send_message("/Transport", [self.args.target_ip + ':' + str(self.args.target_port), os.getcwd() + '\output'])
-        print(os.getcwd() + '\output\\' + self.gloss)
-        print(self.args.target_ip + ':' + str(self.args.target_port))
+    def save_file(self, timecode, blendshapeCSV, referenceMOV, *args):
+        # print(f"{args}")
+        print("send the transport towards - " + self.args.target_ip + ':' + str(self.args.target_port))
+        print(timecode, blendshapeCSV, referenceMOV, *args)
+        # Ask our client to send a transport message to our server 
+        self.client.send_message("/Transport", [self.args.target_ip + ':' + str(self.args.target_port), referenceMOV])
 
 # Class LiveLinkFaceServer launches the live link server that communicates with the IPhone
 # The IP used in this server should be the same as the listener in the IPhone
@@ -55,13 +56,13 @@ class LiveLinkFaceServer:
     def __init__(self, controller):
         self.gloss = controller.gloss
         self.args = controller.args
-      
+
         # Start server rules here, add a default rule for all other incoming messages
         self.dispatcher = Dispatcher()
         self.dispatcher.map("/OSCSetSendTargetConfirm", print)
 
         # When the recording is fully finished, instruct the client to save the file locally
-        self.dispatcher.map("/RecordStopConfirm", controller.llfc.save_file, "fsaf")
+        self.dispatcher.map("/RecordStopConfirm", controller.llfc.save_file)
         self.dispatcher.set_default_handler(self.default)
 
         # Launch Server
@@ -80,7 +81,7 @@ class LiveLinkFaceServer:
 
         # After we are done with the server, close it
         transport.close()
-        
+
     # Print all messages by default
     def default(self, address, *args):
         print(f"{address}: {args}")
