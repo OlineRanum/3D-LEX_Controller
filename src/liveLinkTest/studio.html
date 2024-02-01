@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Button Events</title>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+</head>
+<body>
+
+<button id="startButton">Start</button>
+<button id="stopButton">Stop</button>
+<button id="againButton">Again</button>
+<br>
+<input type="text" value="voorbeeld" id="label">
+<script>
+    label = $("#label").val();
+    const socket = new WebSocket('ws://localhost:1337');
+
+
+    socket.addEventListener('open', (event) => {
+        console.log('WebSocket connection opened:', event);
+    });
+
+    socket.addEventListener('message', (event) => {
+        const response = JSON.parse(event.data);
+        console.log('Server response:', response);
+    });
+
+    document.addEventListener('keydown', function (event) {
+        let button;
+
+        switch (event.key) {
+            case 'a':
+                button = 'start';
+                break;
+            case 'b':
+                button = 'stop';
+                break;
+            case 'c':
+                button = 'again';
+                break;
+            default:
+                return;
+        }
+        const message = JSON.stringify({ button, label });
+        socket.send(message);
+    });
+
+    document.getElementById('startButton').addEventListener('click', function () {
+        const message = JSON.stringify({ button: 'start', label: 'Button Click' });
+        socket.send(message);
+    });
+
+    document.getElementById('stopButton').addEventListener('click', function () {
+        const message = JSON.stringify({ button: 'stop', label: 'Button Click' });
+        socket.send(message);
+    });
+    //Voor AGAIN geen route naar WS://, dit is voor GOP intern
+
+</script>
+
+</body>
+</html>

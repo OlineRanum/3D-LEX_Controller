@@ -8,7 +8,7 @@ def receive_file(server_ip, server_port, output_file_path):
     server_socket.listen(1)
 
     print(f"Server listening on {server_ip}:{server_port}")
-ddd
+
     # Accept a connection from a client
     client_socket, client_address = server_socket.accept()
     print(f"Connection established from {client_address}")
