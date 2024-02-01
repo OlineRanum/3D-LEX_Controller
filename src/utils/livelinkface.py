@@ -2,6 +2,8 @@ from pythonosc.udp_client import SimpleUDPClient
 from pythonosc.dispatcher import Dispatcher
 from pythonosc.osc_server import BlockingOSCUDPServer
 import sys
+import socket
+import struct
 
 # Class LiveLinkFaceClient sends messages to the live link server on the IPhone
 class LiveLinkFaceClient:
@@ -65,6 +67,8 @@ class LiveLinkFaceServer:
         # When the recording is fully finished, instruct the client to save the file locally
         self.dispatcher.map("/RecordStopConfirm", self.client.save_file)
 
+        self.dispatcher.map("/CloseTCPListener", self.send_close_tcp)
+
         # What to do with unknown messages
         self.dispatcher.set_default_handler(self.default)
 
@@ -77,6 +81,15 @@ class LiveLinkFaceServer:
     # Exit the server and client through the /QuitServer handle
     def quit_server(self, *args):
         sys.exit()
+
+    def send_close_tcp(self, *args):
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as client_socket:
+            client_socket.connect((self.args.target_ip, self.args.target_port + 2))
+
+            # Send the close message
+            close_message = "!CLOSE"
+            client_socket.sendall(struct.pack('>I', len(close_message)))
+            client_socket.sendall(close_message.encode())
 
     # Print all messages by default
     def default(self, address, *args):

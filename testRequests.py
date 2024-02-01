@@ -12,9 +12,10 @@ async def slaap():
 ip = "192.168.0.180"
 port = 8005
 client = SimpleUDPClient(ip, port) 
-client.send_message("/RecordStart", [])
-asyncio.run(slaap())
-client.send_message("/RecordStop", [])
+# client.send_message("/RecordStart", [])
+# asyncio.run(slaap())
+# client.send_message("/RecordStop", [])
 
 
 # client.send_message("/QuitServer", [])
+client.send_message("/CloseTCPListener", [])
