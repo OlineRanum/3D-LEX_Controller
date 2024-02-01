@@ -35,10 +35,10 @@ class LiveLinkFaceClient:
         self.toIphone.send_message("/BatteryQuery", [])
 
     def save_file(self, timecode, blendshapeCSV, referenceMOV, *args):
-        print("send the transport towards - " + self.args.target_ip + ':' + str(self.args.target_port))
-        print(timecode, blendshapeCSV, referenceMOV, *args)
+        print("send the transport towards - " + self.args.target_ip + ':' + str(self.args.target_port + 2))
+        # print(timecode, blendshapeCSV, referenceMOV, *args)
         # Ask our client to send a transport message to our server 
-        self.toIphone.send_message("/Transport", [self.args.target_ip + ':' + str(self.args.target_port), referenceMOV])
+        self.toIphone.send_message("/Transport", [self.args.target_ip + ':' + str(self.args.target_port + 2), referenceMOV])
 
 # Class LiveLinkFaceServer launches the live link server that communicates with the IPhone
 # The IP used in this server should be the same as the listener in the IPhone
