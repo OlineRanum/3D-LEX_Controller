@@ -20,6 +20,7 @@ Install requirements
 - Make a batching system to feed files from Shogun Live into Post 
 
 # handles / functions for the OSC server
+In order to communicate with the OSC server, we use handles. The following handles are defined:
 - "/QuitServer", quits the server and closes the python script
 - "/SetFileName", takes a _gloss_ and sets the filename to the gloss name
 - "/RecordStart", requests the IPhone to start capturing
