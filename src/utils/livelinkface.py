@@ -58,6 +58,7 @@ class LiveLinkFaceServer:
         self.dispatcher.map("/QuitServer", self.quit_server)
 
         # Start client requests here
+        self.dispatcher.map("/BatteryQuery", self.client.request_battery)
         self.dispatcher.map("/SetFileName", self.client.set_filename)
         self.dispatcher.map("/RecordStart", self.client.start_capture)
         self.dispatcher.map("/RecordStop", self.client.stop_capture)
