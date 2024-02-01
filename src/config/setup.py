@@ -20,7 +20,8 @@ class SetUp:
         self.start_key = self.hotkeys.get('start', 'default_start_key')  
         self.stop_key = self.hotkeys.get('stop', 'default_stop_key')  
         self.save_key = self.hotkeys.get('save', 'default_save_key')  
-        print(f"Start key: {self.start_key}, Stop key: {self.stop_key}, Save key: {self.save_key}")
+        self.battery_key = self.hotkeys.get('battery', 'default_battery_key')  
+        print(f"Start key: {self.start_key}, Stop key: {self.stop_key}, Save key: {self.save_key}, Battery key: {self.battery_key}")
 
     def __load_host_info(self):
         # Live Link Face

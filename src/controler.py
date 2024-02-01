@@ -82,6 +82,18 @@ class Controller:
 
                 # Trigger LLF to stop recording
                 self.llfc.stop_capture()
+
+            #--------------------------------------------
+            # request battery life (used for debugging)
+            #--------------------------------------------
+            elif key.char == self.args.battery_key:
+                print('{0}: Requesting battery'.format(key.char))
+                # Trigger vicon to stop recording
+                # Hand engine automatically triggered if trigger congifured in shogun live
+                #self.vc.stop_capture()
+
+                # Trigger LLF to stop recording
+                self.llfc.request_battery()
                 
             #--------------------------------------------
             # Save recording when save key is pressed

@@ -29,7 +29,7 @@ class LiveLinkFaceClient:
     def stop_capture(self):
         self.client.send_message("/RecordStop", [])
         self.takenumber += 1
-        self.save_file()
+        # self.save_file()
 
     def set_filename(self, gloss):
         self.gloss = gloss
@@ -37,7 +37,6 @@ class LiveLinkFaceClient:
         self.takenumber = 0
     
     def request_battery(self):
-        print('request battery')
         self.client.send_message("/BatteryQuery", [])
 
     def save_file(self, timecode, blendshapeCSV, referenceMOV, *args):

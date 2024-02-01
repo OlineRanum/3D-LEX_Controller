@@ -3,6 +3,7 @@ keys:
   start: 'r'
   stop: 'e'
   save: 's'
+  battery: 'b'
 
 # Path to the folder where the data is saved
 output_dir: output
