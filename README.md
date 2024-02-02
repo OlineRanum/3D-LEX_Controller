@@ -28,3 +28,12 @@ In order to communicate with the OSC server, we use handles. The following handl
 - "/BatteryQuery", requests the battery value of the IPhone and outputs it to the terminal
 - "/*", everything else will be printed in the terminal
 
+### TCP socket communication
+The TCP socket can be communicated with. The socket has 2 states:
+- Accepting commands
+- Accepting data
+The socket starts in the accepting commands state, and will move to the accepting data state when a message is received. The socket moves from accepting data to accepting commands if a message is received.
+The commands can be send through the OSC server functions and are as follows:
+- "/CloseTCPListener", close the socket
+- "/SendFileNameToTCP" [<file name here>], send a file name to the socket
+The data will be send by the IPhone after the "/Transport" message has been send to it.

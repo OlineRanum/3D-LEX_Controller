@@ -17,5 +17,6 @@ client = SimpleUDPClient(ip, port)
 # client.send_message("/RecordStop", [])
 
 
-# client.send_message("/QuitServer", [])
-client.send_message("/CloseTCPListener", [])
+client.send_message("/QuitServer", [])
+# client.send_message("/CloseTCPListener", [])
+# client.send_message("/SendFileNameToTCP", ["Dit zouden dan contents kunnen zijn van de iphone"])

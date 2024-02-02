@@ -36,10 +36,9 @@ class LiveLinkFaceClient:
     def request_battery(self, *args):
         self.toIphone.send_message("/BatteryQuery", [])
 
+    # Ask our client to send a transport message to the IPhone, the IPhone will send data to the TCP socket
     def save_file(self, timecode, blendshapeCSV, referenceMOV, *args):
         print("send the transport towards - " + self.args.target_ip + ':' + str(self.args.target_port + 2))
-        # print(timecode, blendshapeCSV, referenceMOV, *args)
-        # Ask our client to send a transport message to our server 
         self.toIphone.send_message("/Transport", [self.args.target_ip + ':' + str(self.args.target_port + 2), referenceMOV])
 
 # Class LiveLinkFaceServer launches the live link server that communicates with the IPhone
@@ -67,7 +66,9 @@ class LiveLinkFaceServer:
         # When the recording is fully finished, instruct the client to save the file locally
         self.dispatcher.map("/RecordStopConfirm", self.client.save_file)
 
+        # Start TCP requests here
         self.dispatcher.map("/CloseTCPListener", self.send_close_tcp)
+        self.dispatcher.map("/SendFileNameToTCP", self.send_file_name_tcp)
 
         # What to do with unknown messages
         self.dispatcher.set_default_handler(self.default)
@@ -82,14 +83,27 @@ class LiveLinkFaceServer:
     def quit_server(self, *args):
         sys.exit()
 
+    # Ask the TCP socket to close itself
     def send_close_tcp(self, *args):
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as client_socket:
             client_socket.connect((self.args.target_ip, self.args.target_port + 2))
 
             # Send the close message
-            close_message = "!CLOSE"
+            close_message = "CLOSE!"
             client_socket.sendall(struct.pack('>I', len(close_message)))
             client_socket.sendall(close_message.encode())
+
+    # Send the TCP socket a file name
+    def send_file_name_tcp(self, addr, file_name, *args):
+        print(f"{addr}, {file_name}, {args}")
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as client_socket:
+            client_socket.connect((self.args.target_ip, self.args.target_port + 2))
+
+            # Send length of message and then contents
+            message = file_name + "!"
+            client_socket.sendall(struct.pack('>I', len(message)))
+            client_socket.sendall(message.encode())
+
 
     # Print all messages by default
     def default(self, address, *args):
