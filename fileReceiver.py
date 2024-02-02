@@ -35,6 +35,8 @@ def receive_file(server_ip, server_port):
                 # Give the ability to close the connection with a CLOSE msg, or receive the file name
                 if cmd == 'CLOSE':
                     break
+                elif cmd == 'ALIVE':
+                    print("we are alive")
                 else:
                     file_name = cmd
             # If we have a file name, we are expecting data to put in the file
