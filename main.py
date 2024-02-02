@@ -1,15 +1,13 @@
 from src.config.setup import SetUp
-from src.controler import Controller
 from src.utils.livelinkface import LiveLinkFaceServer
-from asyncio import run 
 
 
 if __name__ == "__main__":
+    # Fetch args
     args = SetUp("config.yaml")
-    controller = Controller(args)
-    server = LiveLinkFaceServer(controller)
-    
-        
 
-    
-    
+    # Setup server client model
+    server = LiveLinkFaceServer("testGloss", args)
+
+    # Launch Server
+    server.init_server()

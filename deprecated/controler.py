@@ -1,5 +1,6 @@
 from pynput import keyboard
 from asyncio import run
+import asyncio
 #from src.utils.vicon import ShogunClient
 #from src.utils.websocket_client import WebSocketClient
 from src.utils.filemanager import FileManager
@@ -14,6 +15,7 @@ class Controller:
             on_release=self.__on_release
         )
 
+        self.quit = False
         self.args = args
 
         # For managing and cleaning up files
@@ -82,7 +84,31 @@ class Controller:
 
                 # Trigger LLF to stop recording
                 self.llfc.stop_capture()
-                
+
+            #--------------------------------------------
+            # request battery life (used for debugging)
+            #--------------------------------------------
+            elif key.char == self.args.battery_key:
+                print('{0}: Requesting battery'.format(key.char))
+                # Trigger vicon to stop recording
+                # Hand engine automatically triggered if trigger congifured in shogun live
+                #self.vc.stop_capture()
+
+                # Trigger LLF to stop recording
+                self.llfc.request_battery()
+            
+            #--------------------------------------------
+            # request battery life (used for debugging)
+            #--------------------------------------------
+            elif key.char == self.args.quit_key:
+                print('{0}: quiting program...'.format(key.char))
+                # Trigger vicon to stop recording
+                # Hand engine automatically triggered if trigger congifured in shogun live
+                #self.vc.stop_capture()
+
+                # Trigger LLF to stop recording
+                self.quit = True
+
             #--------------------------------------------
             # Save recording when save key is pressed
             #--------------------------------------------
@@ -133,10 +159,18 @@ class Controller:
 
 
 
-    def start(self):
-        # Start the listener
-        with self.listener as listener:
-            listener.join()
+    async def start(self):
+        setupSelf = True
+        while (not self.quit):
+            print(self.quit)
 
+            if (setupSelf):
+                # Start the listener
+                with self.listener as listener:
+                    listener.join()
+                setupSelf = False
+
+            print(self.quit)
+            await asyncio.sleep(1)
 
 

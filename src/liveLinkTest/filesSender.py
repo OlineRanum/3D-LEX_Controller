@@ -31,4 +31,4 @@ def send_file(server_ip, server_port, file_path):
 if __name__ == "__main__":
     # Replace '127.0.0.1' and 9000 with the IP address and port where your server is running
     # Replace 'path/to/your/file' with the actual path to the file you want to send
-    send_file("192.168.0.226", 9000, r"C:\users\gotters\livelinkOSC\blabla.txt")
+    send_file("192.168.0.180", 8007, r"C:\Users\VICON\Desktop\Code\Glex\GLEX_Controller\src\liveLinkTest\blabla.txt")
