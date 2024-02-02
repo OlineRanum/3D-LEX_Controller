@@ -3,22 +3,21 @@ from vicon_core_api import *
 from shogun_live_api import *
 from shogun_live_api import CaptureServices
 from vicon_core_api import Client
-import utils
+import src.utils.utils as utils
 
 class Control:
     def __init__(self, args):
         self.PC_IP = args.target_ip
-        self.PORT_TCP_IPHONE = args.TCP_Iphone_port
+        self.PORT_TCP_IPHONE = args.tcp_iphone_port
         self.SHOGUN_IP = args.shogun_hostname
         self.OSC_client = SimpleUDPClient(self.PC_IP, args.target_port) 
         self.PORT = args.controller_port
 
         # Connect Vicon Core API client to the application.
-        with Client(self.PC_IP, args.shogun_port) as client:
-            self.vicon_client = client
-            utils.check_connected(client)
-            # Create required Shogun Live API services.
-            self.vicon_capture_services = CaptureServices(client)
+        self.vicon_client = Client(self.PC_IP, args.shogun_port)
+        utils.check_connected(self.vicon_client)
+        # Create required Shogun Live API services.
+        self.vicon_capture_services = CaptureServices(self.vicon_client)
 
     # Start record (OSC and shogun)
     def start_record_osc_shogun(self):
@@ -28,7 +27,7 @@ class Control:
     # Stop record (OSC and shogun)
     def stop_record_osc_shogun(self):
         self.OSC_client.send_message("/RecordStop", [])
-        self.vicon_capture_services.stop_capture()
+        self.vicon_capture_services.stop_capture(0)
 
     # Send FileName (OSC and shogun)
     def set_file_name_osc_shogun(self, file_name):
@@ -37,10 +36,10 @@ class Control:
 
     # Close connections and servers (OSC, IPhone)
     def close_osc_iphone(self):
-        self.OSC_client.send_message("/QuitServer", [])
         self.OSC_client.send_message("/CloseTCPListener", [])
+        self.OSC_client.send_message("/QuitServer", [])
 
     # Are all servers still alive? We expect prints from them
-    def servers_alive(self, timeouttime):
+    def servers_alive(self):
         self.OSC_client.send_message("/Alive", [])
         utils.check_connected(self.vicon_client)
