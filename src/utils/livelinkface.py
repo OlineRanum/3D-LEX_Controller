@@ -69,6 +69,7 @@ class LiveLinkFaceServer:
         # Start TCP requests here
         self.dispatcher.map("/CloseTCPListener", self.send_close_tcp)
         self.dispatcher.map("/SendFileNameToTCP", self.send_file_name_tcp)
+        self.dispatcher.map("/Alive", self.ping_back)
 
         # What to do with unknown messages
         self.dispatcher.set_default_handler(self.default)
@@ -104,6 +105,20 @@ class LiveLinkFaceServer:
             client_socket.sendall(struct.pack('>I', len(message)))
             client_socket.sendall(message.encode())
 
+    # Ask the TCP socket if he is okay
+    def send_are_you_okay_tcp(self, *args):
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as client_socket:
+            client_socket.connect((self.args.target_ip, self.args.target_port + 2))
+
+            # Send the close message
+            close_message = "ALIVE!"
+            client_socket.sendall(struct.pack('>I', len(close_message)))
+            client_socket.sendall(close_message.encode())
+
+    # Tell whoever is asking that we are okay
+    def ping_back(self, *args):
+        print("OSC SERVER ALIVE")
+        self.send_are_you_okay_tcp()
 
     # Print all messages by default
     def default(self, address, *args):

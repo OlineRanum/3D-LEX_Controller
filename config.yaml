@@ -13,17 +13,21 @@ output_dir: output
 
 # Shogun
 shogun_hostname:  'localhost'
+shogun_port: 52800
 
 # Live Link Face
 llf_udp_ip: "192.168.0.153"
 llf_udp_port: 8006
 
 # Local computer 
-target_ip: '192.168.0.180' #'192.168.0.161'
-# '145.100.134.165'
+target_ip: '192.168.0.180'
 target_port: 8005
+tcp_iphone_port: 8007
+controller_port: 8008
 
-
+# Websocket
+websock_ip: 'localhost'
+websock_port: 8009
 
 # Path to downloaded vicon SDK module 
 vicon_sdk_path: 'C:\Program Files\Vicon\DataStream SDK\Win64\Python'
