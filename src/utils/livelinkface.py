@@ -116,7 +116,7 @@ class LiveLinkFaceServer:
             client_socket.sendall(close_message.encode())
 
     # Tell whoever is asking that we are okay
-    def ping_back(self, addr, port):
+    def ping_back(self, *args):
         print("OSC SERVER ALIVE")
         self.send_are_you_okay_tcp()
 
