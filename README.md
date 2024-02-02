@@ -19,6 +19,18 @@ Install requirements
 - Make code to collect files from all systems and pickle them
 - Make a batching system to feed files from Shogun Live into Post 
 
+# How to use the websocket
+The websocket (in mainController.py) serves as the communication with all the devices in this project. It calls the controlAPI.py API to do so. But how do we communicate with the websocket? Connect to the correct port and use the following messages (each message begins with the function call and then some data):
+```
+await websocket.send("greet:Hello, Server!")
+await websocket.send("fileName:TestFileName")
+await websocket.send("ping:a")
+await websocket.send("recordStart:starting the recording")
+await websocket.send("recordStop:stopping the recording")
+await websocket.send("close:a")
+```
+
+
 # handles / functions for the OSC server
 In order to communicate with the OSC server, we use handles. The following handles are defined:
 - "/QuitServer", quits the server and closes the python script
