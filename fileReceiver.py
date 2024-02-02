@@ -41,7 +41,7 @@ def receive_file(server_ip, server_port):
             else:
                 data = client_socket.recv(total_size)
                 # Finally, write the file with the file_name to the output path. Then reset the file_name
-                f = open(os.path.join("output", file_name), 'wb') #open in binary
+                f = open(os.path.join("output", file_name)+".csv", 'wb') #open in binary
                 f.write(data)
                 f.close()
                 print("Writen to file: output/", file_name)
