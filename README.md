@@ -44,8 +44,10 @@ In order to communicate with the OSC server, we use handles. The following handl
 The TCP socket can be communicated with. The socket has 2 states:
 - Accepting commands
 - Accepting data
-The socket starts in the accepting commands state, and will move to the accepting data state when a message is received. The socket moves from accepting data to accepting commands if a message is received.
+The socket starts in the accepting commands state, and will move to the accepting data state when the command "RECORDING" is received. The socket moves from accepting data to accepting commands if _any_ message is received.
 The commands can be send through the OSC server functions and are as follows:
 - "/CloseTCPListener", close the socket
 - "/SendFileNameToTCP" [_file name here_], send a file name to the socket
-The data will be send by the IPhone after the "/Transport" message has been send to it.
+- "/Alive", ask the socket to print something to the terminal
+The RECORDING command is send when we ask the OSC server to record through the "/RecordStart" handle.
+Lastly, the data will be send by the IPhone after the "/Transport" message has been send to it.
