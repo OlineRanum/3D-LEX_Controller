@@ -7,7 +7,7 @@ Install requirements
     pip install -r setup/requirements.txt
 
 ### Using the tool
-In windows 10, couble click the job.bat script to launch all servers simultaneously.
+In windows 10, double click the job.bat script to launch all servers simultaneously.
 
 
 ### Current Pipeline
