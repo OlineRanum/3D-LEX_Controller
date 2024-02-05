@@ -61,7 +61,7 @@ class LiveLinkFaceServer:
         # Start client requests here
         self.dispatcher.map("/BatteryQuery", self.client.request_battery)
         self.dispatcher.map("/SetFileName", self.client.set_filename)
-        self.dispatcher.map("/RecordStart", self.client.start_capture)
+        self.dispatcher.map("/RecordStart", self.start_recording)
         self.dispatcher.map("/RecordStop", self.client.stop_capture)
         # When the recording is fully finished, instruct the client to save the file locally
         self.dispatcher.map("/RecordStopConfirm", self.client.save_file)
@@ -84,36 +84,36 @@ class LiveLinkFaceServer:
     def quit_server(self, *args):
         sys.exit()
 
-    # Ask the TCP socket to close itself
-    def send_close_tcp(self, *args):
+    # Start recording with the IPhone, and start accepting a file with the TCP socket
+    def start_recording(self, *args):
+        self.client.start_capture()
+        self.send_signal_recording_tcp()
+
+    # Send a basic message containing a cmd to the TCP socket
+    def send_basic_cmd_tcp(self, cmd, extra="", *args):
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as client_socket:
             client_socket.connect((self.args.target_ip, self.args.target_port + 2))
 
-            # Send the close message
-            close_message = "CLOSE!"
+            # Send the recording message
+            close_message = cmd + "!" + extra
             client_socket.sendall(struct.pack('>I', len(close_message)))
             client_socket.sendall(close_message.encode())
+
+    # Ask the TCP socket to close itself
+    def send_close_tcp(self, *args):
+        self.send_basic_cmd_tcp('CLOSE')
 
     # Send the TCP socket a file name
     def send_file_name_tcp(self, addr, file_name, *args):
-        print(f"{addr}, {file_name}, {args}")
-        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as client_socket:
-            client_socket.connect((self.args.target_ip, self.args.target_port + 2))
-
-            # Send length of message and then contents
-            message = file_name + "!"
-            client_socket.sendall(struct.pack('>I', len(message)))
-            client_socket.sendall(message.encode())
+        self.send_basic_cmd_tcp('FILE', file_name)
 
     # Ask the TCP socket if he is okay
     def send_are_you_okay_tcp(self, *args):
-        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as client_socket:
-            client_socket.connect((self.args.target_ip, self.args.target_port + 2))
+        self.send_basic_cmd_tcp('ALIVE')
 
-            # Send the close message
-            close_message = "ALIVE!"
-            client_socket.sendall(struct.pack('>I', len(close_message)))
-            client_socket.sendall(close_message.encode())
+    # Set the TCP socket to the "file receiving" mode
+    def send_signal_recording_tcp(self, *args):
+        self.send_basic_cmd_tcp('RECORD')
 
     # Tell whoever is asking that we are okay
     def ping_back(self, *args):

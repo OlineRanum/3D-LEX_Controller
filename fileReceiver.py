@@ -9,8 +9,8 @@ def receive_file(server_ip, server_port):
     server_socket.bind((server_ip, server_port))
     server_socket.listen(1)
 
-    # Initialize a file name, if set to NoFileYet the program will expect this before the file data
-    file_name = "NoFileYet"
+    file_name = "NoFileNameGiven"
+    take_func = True
     os.makedirs("output", exist_ok=True)
 
     print(f"Server listening on {server_ip}:{server_port}")
@@ -28,17 +28,22 @@ def receive_file(server_ip, server_port):
             print("size of msg: ", total_size)
 
             # If we aren't expecting a file yet, we are expecting commands
-            if file_name == "NoFileYet":
+            if take_func:
                 data = client_socket.recv(total_size).decode()
-                cmd = data.split('!', 1)[0]
-                print("Command or file name: ", cmd)
+                cmd, msg = data.split('!', 1)
+                print("Command: ", cmd, "\nmsg: ", msg)
                 # Give the ability to close the connection with a CLOSE msg, or receive the file name
                 if cmd == 'CLOSE':
                     break
                 elif cmd == 'ALIVE':
                     print("we are alive")
+                elif cmd == 'FILE':
+                    file_name = msg
+                elif cmd == 'RECORD':
+                    take_func = False
                 else:
-                    file_name = cmd
+                    print("Unkown command: ", cmd, "\nWith message: ", msg)
+                    print("Please input a different command, we will expect a func")
             # If we have a file name, we are expecting data to put in the file
             else:
                 data = client_socket.recv(total_size)
@@ -47,7 +52,8 @@ def receive_file(server_ip, server_port):
                 f.write(data)
                 f.close()
                 print("Writen to file: output/", file_name)
-                file_name = "NoFileYet"
+                file_name = "NoFileNameGiven"
+                take_func = True
  
         except Exception as e:
             print("Error:", e)
