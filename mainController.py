@@ -3,6 +3,7 @@ import websockets
 from src.config.setup import SetUp
 from src.utils.controlAPI import Control
 import functools
+import os
 
 # Define a global event to signal when to stop the server
 stop_server_event = asyncio.Event()
@@ -25,9 +26,19 @@ async def handle_ping(control, message):
     print("Asking OSC and Shogun to print...")
     control.servers_alive()
 
-async def handle_filename(control, message):
-    print("Asking OSC and Shogun to set the file name...")
-    control.set_file_name_osc_shogun(message.split(':')[1].strip())
+async def handle_filename(control, message, dir="output"):
+    '''
+    Is the file name present in the output directory?
+    Is present: send warning to websocket
+    Is not present: set file names
+    '''
+    file_name = message.split(':')[1].strip()
+    file_path = os.path.join(dir, file_name)
+    if (not os.path.exists(file_path)):
+        print("Asking OSC and Shogun to set the file name...")
+        control.set_file_name_osc_shogun(file_name)
+    else:
+        print("File name: ", file_name, " already in use. Supply another name")
 
 async def handle_greet(message):
     print(f"I have been greeted: {message}")
@@ -37,6 +48,10 @@ async def handle_default(message):
 
 # Define a function to handle incoming messages from clients
 async def message_handler(control, websocket, path):
+    '''
+    This function handles the basis of all messages, and then sends them to
+    the correct handles.
+    '''
     message_handlers = {
         "close": functools.partial(handle_close, control),
         "recordStart": functools.partial(handle_start, control),
