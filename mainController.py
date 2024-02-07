@@ -8,41 +8,55 @@ import functools
 stop_server_event = asyncio.Event()
 
 # Define functions to handle different types of messages
-async def handle_close(control, message):
+async def handle_close(websocket, control, message):
     print("Closing the server...")
     control.close_osc_iphone()
     await stop_server(control)
+    await websocket.send("BYE")
 
-async def handle_start(control, message):
+
+async def handle_start(websocket, control, message):
     print("Asking OSC and Shogun to START record...")
     control.start_record_osc_shogun()
+    await websocket.send("recording")
 
-async def handle_stop(control, message):
+
+async def handle_stop(websocket, control, message):
     print("Asking OSC and Shogun to STOP record...")
     control.stop_record_osc_shogun()
+    await websocket.send("stopping")
 
-async def handle_ping(control, message):
+
+async def handle_ping(websocket, control, message):
     print("Asking OSC and Shogun to print...")
     control.servers_alive()
+    await websocket.send("pong")
 
-async def handle_filename(control, message):
+
+async def handle_filename(websocket, control, message):
     print("Asking OSC and Shogun to set the file name...")
     control.set_file_name_osc_shogun(message.split(':')[1].strip())
+    await websocket.send("filename_set")
 
-async def handle_greet(message):
+
+async def handle_greet(websocket, message):
     print(f"I have been greeted: {message}")
+    await websocket.send("HELLO")
 
-async def handle_default(message):
+
+async def handle_default(websocket, message):
     print(f"Received message: {message}")
+    await websocket.send("So What?")
+
 
 # Define a function to handle incoming messages from clients
 async def message_handler(control, websocket, path):
     message_handlers = {
-        "close": functools.partial(handle_close, control),
-        "recordStart": functools.partial(handle_start, control),
-        "recordStop": functools.partial(handle_stop, control),
-        "ping": functools.partial(handle_ping, control),
-        "fileName": functools.partial(handle_filename, control),
+        "close": functools.partial(handle_close, websocket, control),
+        "recordStart": functools.partial(handle_start, websocket, control),
+        "recordStop": functools.partial(handle_stop, websocket, control),
+        "ping": functools.partial(handle_ping, websocket, control),
+        "fileName": functools.partial(handle_filename, websocket, control),
         "greet": handle_greet,
     }
 
