@@ -1,7 +1,6 @@
-🍍🍍🍍🍍🍍🍍🍍🍍🍍🍍🍍🍍🍍🍍🍍🍍🍍🍍🍍🍍🍍🍍🍍🍍🍍🍍🍍🍍🍍🍍🍍🍍🍍🍍🍍🍍🍍
+🍍🍍🍍🍍🍍🍍🍍🍍🍍🍍🍍
 # 3🍍-LEX Control System 
-🍍🍍🍍🍍🍍🍍🍍🍍🍍🍍🍍🍍🍍🍍🍍🍍🍍🍍🍍🍍🍍🍍🍍🍍🍍🍍🍍🍍🍍🍍🍍🍍🍍🍍🍍🍍🍍
-
+🍍🍍🍍🍍🍍🍍🍍🍍🍍🍍🍍
 ### Usage in Windows
 In windows 10, double click the job.bat script to launch all servers simultaneously.
 
