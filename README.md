@@ -1,6 +1,10 @@
 🍍🍍🍍🍍🍍🍍🍍🍍🍍🍍🍍🍍🍍🍍🍍🍍🍍🍍
-# 3🍍-LEX Control System 
+# The 3🍍-LEX Control System 
 🍍🍍🍍🍍🍍🍍🍍🍍🍍🍍🍍🍍🍍🍍🍍🍍🍍🍍
+
+
+This repository contains the code to operate the data acquisition pipeline for the 3D-LEX dataset project.
+
 ### Usage in Windows
 In windows 10, double click the job.bat script to launch all servers simultaneously.
 
