@@ -21,7 +21,7 @@ In order to communicate with the OSC server, we use handles. The following handl
 - "/QuitServer", quits the server and closes the python script
 - "/SetFileName", takes a _gloss_ and sets the filename to the gloss name
 - "/RecordStart", requests the IPhone to start capturing
--  "/RecordStop", requests the IPhone to stop capturing (IPhone should respond with "/RecordStopConfirm", which triggers saving algorithm)
+-  "/RecordStop", requests the IPhone to stop capturing (IPhone should respond with "/RecordStopConfirm", which triggers the saving algorithm)
 - "/BatteryQuery", requests the battery value of the IPhone and outputs it to the terminal
 - "/*", everything else will be printed in the terminal
 
@@ -31,16 +31,14 @@ The TCP socket can be communicated with. The socket has 2 states:
 - Accepting data
 
 The socket starts in the accepting commands state, and will move to the accepting data state when the command "RECORDING" is received. The socket moves from accepting data to accepting commands if _any_ message is received.
-The commands can be send through the OSC server functions and are as follows:
+The commands can be sent through the OSC server functions and are as follows:
 - "/CloseTCPListener", close the socket
 - "/SendFileNameToTCP" [_file name here_], send a file name to the socket
 - "/Alive", ask the socket to print something to the terminal
 
-The RECORDING command is send when we ask the OSC server to record through the "/RecordStart" handle.
-Lastly, the data will be send by the IPhone after the "/Transport" message has been send to it.
+The RECORDING command is sent when we ask the OSC server to record through the "/RecordStart" handle.
+Lastly, the data will be sent by the IPhone after the "/Transport" message has been sent to it.
 
 ### Pipeline Illustrations
 ![Pipeline](/img/PipelineSignbankProject2.png)
-
-![Pipeline](/img/pipeline.png)
 
