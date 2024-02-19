@@ -3,10 +3,11 @@
 🍍🍍🍍🍍🍍🍍🍍🍍🍍🍍🍍🍍🍍🍍🍍🍍🍍🍍
 
 
-This repository contains the code to operate the data acquisition pipeline for the 3D-LEX dataset project.
+The README for the 3🍍-LEX Control System repository is structured to provide practical guidance on managing data acquisition pipelines. It covers essential topics such as launching servers in a Windows environment, WebSocket communication, OSC server handles/functions, TCP socket communication, and includes helpful pipeline illustrations. Each section offers straightforward instructions and insights, making it easier for developers, researchers, and enthusiasts to understand and utilize the system effectively.
+
 
 ### Usage in Windows
-In windows, double click the job.bat script to launch all servers simultaneously.
+In windows, double click the job.bat script to launch all servers simultaneously. Communcicate with the system by using the websocket.
 
 # How to use the websocket
 The websocket (in mainController.py) serves as the communication with all the devices in this project. It calls the controlAPI.py API to do so. But how do we communicate with the websocket? Connect to the correct port and use the following messages (each message begins with the function call and then some data):
@@ -29,7 +30,7 @@ In order to communicate with the OSC server, we use handles. The following handl
 - "/BatteryQuery", requests the battery value of the IPhone and outputs it to the terminal
 - "/*", everything else will be printed in the terminal
 
-### TCP socket communication
+# TCP socket communication
 The TCP socket can be communicated with. The socket has 2 states:
 - Accepting commands
 - Accepting data
