@@ -6,7 +6,7 @@
 This repository contains the code to operate the data acquisition pipeline for the 3D-LEX dataset project.
 
 ### Usage in Windows
-In windows 10, double click the job.bat script to launch all servers simultaneously.
+In windows, double click the job.bat script to launch all servers simultaneously.
 
 # How to use the websocket
 The websocket (in mainController.py) serves as the communication with all the devices in this project. It calls the controlAPI.py API to do so. But how do we communicate with the websocket? Connect to the correct port and use the following messages (each message begins with the function call and then some data):
