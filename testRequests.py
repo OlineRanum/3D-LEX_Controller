@@ -27,7 +27,7 @@ import asyncio
 import websockets
 
 async def send_messages():
-    uri = "ws://localhost:8009"
+    uri = "ws://192.168.0.180:8009"
     async with websockets.connect(uri) as websocket:
         # Send "greet" message
         # await websocket.send("greet:Hello, Server!")

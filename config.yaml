@@ -16,7 +16,7 @@ shogun_hostname:  'localhost'
 shogun_port: 52800
 
 # Live Link Face
-llf_udp_ip: "192.168.0.153"
+llf_udp_ip: "192.168.0.208"
 llf_udp_port: 8006
 
 # Local computer 
@@ -26,7 +26,7 @@ tcp_iphone_port: 8007
 controller_port: 8008
 
 # Websocket
-websock_ip: 'localhost'
+websock_ip: '192.168.0.180'
 websock_port: 8009
 
 # Path to downloaded vicon SDK module 

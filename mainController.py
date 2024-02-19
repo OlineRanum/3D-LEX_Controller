@@ -35,19 +35,22 @@ async def handle_ping(websocket, control, message):
 
 
 async def handle_filename(websocket, control, message):
+    '''
+    Is the file name present in the output directory?
+    Is present: send warning to websocket
+    Is not present: set file names
+    '''
     print("Asking OSC and Shogun to set the file name...")
     control.set_file_name_osc_shogun(message.split(':')[1].strip())
     await websocket.send("filename_set")
 
 
-async def handle_greet(websocket, message):
+async def handle_greet(message):
     print(f"I have been greeted: {message}")
-    await websocket.send("HELLO")
 
 
-async def handle_default(websocket, message):
+async def handle_default(message):
     print(f"Received message: {message}")
-    await websocket.send("So What?")
 
 
 # Define a function to handle incoming messages from clients
