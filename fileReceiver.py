@@ -1,9 +1,48 @@
+"""
+File: fileReceiver.py
+
+Description:
+This script defines a function `receive_file` to receive files over TCP/IP.
+It listens for incoming connections on a specified IP address and port,
+receives data packets containing files, and writes the files to the 'output' directory.
+
+Functions:
+- receive_file(server_ip, server_port): Main function to receive files over TCP/IP.
+
+Usage:
+Ensure the IP address and port in the TCP connection part match the settings in the OSC server.
+Run the script to start receiving files.
+
+Note:
+To kill a Python task in Windows, use the following commands:
+tasklist | FIND "python"
+>taskkill /F /PID
+"""
 import socket
 import struct
 import os
 
-# Receive file on a given ip and port
 def receive_file(server_ip, server_port):
+    """
+    Receive file on a given IP and port.
+
+    Args:
+    - server_ip (str): The IP address to bind the server socket to.
+    - server_port (int): The port number to bind the server socket to.
+
+    Description:
+    This function creates a TCP socket, binds it to the specified IP address and port,
+    and listens for incoming connections. It accepts a single connection at a time
+    and receives data packets containing files. The received files are written to
+    the 'output' directory. The function handles commands and data packets
+    according to the opening of the packet message.
+    The function is used to receive blendshapes files from an IPhone running
+    Live Link Face.
+
+    Returns:
+    None
+    """
+
     # Create a TCP socket, and accept only 1 connection simultaniously
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server_socket.bind((server_ip, server_port))
@@ -69,7 +108,3 @@ if __name__ == "__main__":
     ip_serve = "192.168.0.180"
     port_serve = 8007 # port is currently the OSC server port + 2
     receive_file(ip_serve, port_serve)
-
-# To kill a python task in windows, use the following commands:
-# tasklist | FIND "python"
-# >taskkill /F /PID
