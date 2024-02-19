@@ -59,6 +59,6 @@ The commands can be sent through the OSC server functions and are as follows:
 The RECORDING command is sent when we ask the OSC server to record through the "/RecordStart" handle.
 Lastly, the data will be sent by the IPhone after the "/Transport" message has been sent to it.
 
-### Pipeline Illustrations
+# Pipeline Illustrations
 ![Pipeline](/img/PipelineSignbankProject2.png)
 
