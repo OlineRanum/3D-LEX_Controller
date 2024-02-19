@@ -7,7 +7,7 @@ The README for the 3🍍-LEX Control System repository is structured to provide 
 
 
 ### Usage in Windows
-In windows, double click the job.bat script to launch all servers simultaneously. Communcicate with the system by using the websocket.
+In windows, double click the job.bat script to launch all servers simultaneously. Communicate with the system by using the websocket.
 
 # How to use the websocket
 The websocket (in mainController.py) serves as the communication with all the devices in this project. It calls the controlAPI.py API to do so. But how do we communicate with the websocket? Connect to the correct port and use the following messages (each message begins with the function call and then some data):
