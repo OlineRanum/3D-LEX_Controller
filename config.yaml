@@ -26,8 +26,8 @@ tcp_iphone_port: 8007
 controller_port: 8008
 
 # Websocket
-websock_ip: '192.168.0.180'
-websock_port: 8009
+websock_ip: 'leffe.science.uva.nl:8043/unrealServer/'
+websock_port: 8043
 
 # Path to downloaded vicon SDK module 
 vicon_sdk_path: 'C:\Program Files\Vicon\DataStream SDK\Win64\Python'
