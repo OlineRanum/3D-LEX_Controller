@@ -32,6 +32,7 @@ from src.config.setup import SetUp
 from src.utils.controlAPI import Control
 import functools
 import os
+import ssl
 
 # Define a global event to signal when to stop the server
 stop_server_event = asyncio.Event()
@@ -184,7 +185,11 @@ async def start_server(control, args):
     None
     """
     uri = "wss://leffe.science.uva.nl:8043/unrealServer/"
-    async with websockets.connect(uri) as websocket:
+    ssl_context = ssl.SSLContext()
+    ssl_context.check_hostname = False
+    ssl_context.verify_mode = ssl.CERT_NONE
+
+    async with websockets.connect(uri, ssl=ssl_context) as websocket:
         print("Websocket Server started!")
         # Wait until the stop event is set
         await stop_server_event.wait()
