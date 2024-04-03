@@ -183,8 +183,7 @@ async def start_server(control, args):
     Returns:
     None
     """
-    handler = functools.partial(message_handler, control)
-    async with websockets.serve(handler, args.websock_ip, args.websock_port):
+    async with websockets.listen((args.websock_ip, args.websock_port)):
         print("Websocket Server started!")
         # Wait until the stop event is set
         await stop_server_event.wait()
