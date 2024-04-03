@@ -183,7 +183,8 @@ async def start_server(control, args):
     Returns:
     None
     """
-    async with websockets.listen((args.websock_ip, args.websock_port)):
+    uri = "wss://leffe.science.uva.nl:8043/unrealServer/"
+    async with websockets.connect(uri) as websocket:
         print("Websocket Server started!")
         # Wait until the stop event is set
         await stop_server_event.wait()
