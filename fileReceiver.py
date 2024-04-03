@@ -22,7 +22,7 @@ import socket
 import struct
 import os
 
-def receive_file(server_ip, server_port):
+def receive_file(server_ip, server_port, write_path):
     """
     Receive file on a given IP and port.
 
@@ -87,10 +87,10 @@ def receive_file(server_ip, server_port):
             else:
                 data = client_socket.recv(total_size)
                 # Finally, write the file with the file_name to the output path. Then reset the file_name
-                f = open(os.path.join(r"C:\Users\Public\Documents\Vicon\ShogunLive1.x\Captures\livelinkface", file_name)+".csv", 'wb') #open in binary
+                f = open(os.path.join(write_path, file_name)+".csv", 'wb') #open in binary
                 f.write(data)
                 f.close()
-                print("Writen to file: output/", file_name)
+                print("Writen to file: " + write_path + "\\" + file_name)
                 file_name = "NoFileNameGiven"
                 take_func = True
  
@@ -107,4 +107,7 @@ if __name__ == "__main__":
     # Make sure the IP and Port are the same in the TCP connection part of the OSC server
     ip_serve = "192.168.0.180"
     port_serve = 8007 # port is currently the OSC server port + 2
-    receive_file(ip_serve, port_serve)
+    write_path = r"C:\Users\Public\Documents\Vicon\ShogunLive1.x\Captures\livelinkface"
+    print("Starting file receiver...")
+    print("Writing files to: ", write_path)
+    receive_file(ip_serve, port_serve, write_path)
