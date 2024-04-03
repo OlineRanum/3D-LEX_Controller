@@ -215,4 +215,15 @@ if __name__ == "__main__":
     control = Control(args)
 
     # Accept calls, and let the websockt control the controller
-    asyncio.run(start_server(control, args))
+    # asyncio.run(start_server(control, args))
+
+
+    # Create and run the event loop
+    loop = asyncio.get_event_loop()
+    try:
+        # Start the server within the existing event loop
+        loop.run_until_complete(start_server(control, args))
+        loop.run_forever()
+    finally:
+        # Clean up the event loop
+        loop.close()

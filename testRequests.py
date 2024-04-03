@@ -32,12 +32,14 @@ async def send_messages():
         # Send "greet" message
         # await websocket.send("greet:Hello, Server!")
 
-        # await websocket.send("fileName:NAAMaaaaa")
-        # await websocket.send("ping:a")
+        await websocket.send("ping:a")
+        await websocket.send("fileName:test0204")
+        await asyncio.sleep(5)
 
-        # await websocket.send("recordStart:starting the recording")
-        # await asyncio.sleep(2)
-        # await websocket.send("recordStop:stopping the recording")
+        await websocket.send("recordStart:starting the recording")
+        await asyncio.sleep(10)
+        await websocket.send("recordStop:stopping the recording")
+        await asyncio.sleep(2)
 
 
         # Send "close" message
