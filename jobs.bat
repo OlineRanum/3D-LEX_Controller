@@ -4,3 +4,4 @@ REM to run Python scripts concurrently.
 start cmd /k python mainController.py
 start cmd /k python mainOSC.py
 start cmd /k python fileReceiver.py
+start cmd /k python leffeCon.py
