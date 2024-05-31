@@ -184,12 +184,8 @@ async def start_server(control, args):
     Returns:
     None
     """
-    uri = "wss://leffe.science.uva.nl:8043/unrealServer/"
-    ssl_context = ssl.SSLContext()
-    ssl_context.check_hostname = False
-    ssl_context.verify_mode = ssl.CERT_NONE
-
-    async with websockets.connect(uri, ssl=ssl_context) as websocket:
+    handler = functools.partial(message_handler, control)
+    async with websockets.serve(handler, args.websock_ip, args.websock_port):
         print("Websocket Server started!")
         # Wait until the stop event is set
         await stop_server_event.wait()
