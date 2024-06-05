@@ -46,18 +46,17 @@ In order to communicate with the OSC server, we use handles. The following handl
 - "/*", everything else will be printed in the terminal
 
 # TCP socket communication
-The TCP socket can be communicated with. The socket has 2 states:
-- Accepting commands
-- Accepting data
+The socket operates in a single state, handling incoming messages based on their content. The socket differentiates between commands and data as follows:
 
-The socket starts in the accepting commands state, and will move to the accepting data state when the command "RECORDING" is received. The socket moves from accepting data to accepting commands if _any_ message is received.
-The commands can be sent through the OSC server functions and are as follows:
-- "/CloseTCPListener", close the socket
-- "/SendFileNameToTCP" [_file name here_], send a file name to the socket
-- "/Alive", ask the socket to print something to the terminal
+- **Commands**: Messages containing a '!' character are considered commands. These include:
+  - **"FILE!<file_name>"**: Sets the file name for the incoming data.
+  - **"RECORD!<message>"**: Indicates that the socket should start accepting data.
+  - **"CLOSE!<message>"**: Closes the socket.
+  - **"ALIVE!<message>"**: Prints a message to confirm the socket is active.
+- **Data**: Messages without a '!' character or messages with a '!' character but no matching command are treated as file data. These are saved to a file in the specified directory.
 
-The RECORDING command is sent when we ask the OSC server to record through the "/RecordStart" handle.
-Lastly, the data will be sent by the IPhone after the "/Transport" message has been sent to it.
+### Default File Naming
+If a file name is not specified using the "FILE" command, the data will be saved with the default name "NoFileNameGiven". Subsequent recordings will append "_rerecorded" to the file name.
 
 # Pipeline Illustrations
 ![Pipeline](/img/PipelineSignbankProject2.png)
