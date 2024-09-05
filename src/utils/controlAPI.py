@@ -23,11 +23,26 @@ Ensure correct configuration of IP addresses, ports, and other settings in the a
 provided to the Control class during instantiation.
 '''
 from pythonosc.udp_client import SimpleUDPClient
-from vicon_core_api import *
-from shogun_live_api import *
-from shogun_live_api import CaptureServices
-from vicon_core_api import Client
+# from vicon_core_api import *
+# from shogun_live_api import *
 import src.utils.utils as utils
+import sys
+import os
+import time
+# get the path to the Shogun SDK
+sys.path.append(r"C:\Program Files\Vicon\ShogunLive1.12\SDK\Python")
+
+# get the cur path to current folder for importing shogunPostFuncs
+cur_path = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(cur_path)
+
+try:
+    import shogunPostFuncs as spf
+    from shogun_live_api.interfaces.capture_services import CaptureServices
+    from vicon_core_api.client import Client, RPCError
+except ImportError as e:
+    print(f"ImportError: {str(e)}")
+    sys.exit(1)
 
 class Control:
     def __init__(self, args):
@@ -65,6 +80,11 @@ class Control:
         # Create required Shogun Live API services.
         self.vicon_capture_services = CaptureServices(self.vicon_client)
 
+        self.SHOGUN_POST = spf.ViconShogunPost()
+        self.last_path = self.get_capture_folder_shogun()
+
+        print("Control API for Vicon Shogun Live initialized.")
+
     def start_record_osc_shogun(self):
         """
         Start recording via OSC and Shogun.
@@ -76,8 +96,43 @@ class Control:
         """
         Stop recording via OSC and Shogun.
         """
+        folder = self.get_capture_folder_shogun()[1]
+        name = self.vicon_capture_services.capture_name()[1]
+        self.last_path = folder + "\\" + name + ".mcp"
+
+        # Check if last path already exists and rename it to _old_{1} if it does
+        if os.path.exists(self.last_path):
+            print(f"File already exists: {self.last_path}")
+            i = 1
+            old_path = folder + "\\" + name + f"_old_{i}.mcp"
+            while os.path.exists(old_path):
+                i += 1
+                old_path = folder + "\\" + name + f"_old_{i}.mcp"
+            print(f"Renaming to: {old_path}")
+            os.rename(self.last_path, old_path)
+
         self.OSC_client.send_message("/RecordStop", [])
-        self.vicon_capture_services.stop_capture(0)
+        result = self.vicon_capture_services.stop_capture(0)
+        print(f"Recording stopped. Result: {result}")
+        self.open_last_file_shogun()
+
+    def open_last_file_shogun(self):
+        """
+        Open the last recorded file in Shogun Live.
+        """
+        self.SHOGUN_POST.CloseFile()
+        result = self.SHOGUN_POST.OpenFile(self.last_path)
+
+        # Handle Error attribute correctly
+        if hasattr(result, 'Error'):
+            # Call the Error method to get the actual error message
+            error_code = result.Error()  # Call it as a function
+
+        # If error_code is True, then wait for 1 second and try again
+        if error_code:
+            print("Error occurred. Waiting for 1 second and trying again.")
+            time.sleep(1)
+            result = self.SHOGUN_POST.OpenFile(self.last_path)
 
     def set_file_name_osc_shogun(self, file_name):
         """
@@ -86,8 +141,19 @@ class Control:
         Args:
         - file_name (str): Name of the file.
         """
+        if (file_name == ""):
+            print("No file name provided.")
+            return
+
         self.OSC_client.send_message("/SendFileNameToTCP", [file_name])
+        print(f"Setting the file name to: '{file_name}'")
         self.vicon_capture_services.set_capture_name(file_name)
+
+    def get_capture_folder_shogun(self):
+        """
+        Get the capture folder from Shogun Live API.
+        """
+        return self.vicon_capture_services.capture_folder()
 
     def close_osc_iphone(self):
         """
