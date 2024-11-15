@@ -69,3 +69,7 @@ class ViconShogunPost(object):
     def setPAL100(self):
         hsl = """setFrameRate "pal" 100.000000;"""
         return self._Client.HSL(hsl)
+
+# # Example usage, setting pal
+# shogun_post = ViconShogunPost()
+# shogun_post.setPAL100()

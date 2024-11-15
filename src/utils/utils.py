@@ -7,6 +7,9 @@ import threading
 import time
 import traceback
 
+import sys
+sys.path.append(r"C:\Program Files\Vicon\ShogunLive1.13\SDK\Python\vicon_core_api")
+
 from vicon_core_api import Client, Result, RPCError
 
 
