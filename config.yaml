@@ -13,7 +13,11 @@ output_dir: output
 
 # Shogun
 shogun_hostname:  'localhost'
+# shogun_hostname:  '192.168.0.180'
+# shogun_hostname: '127.0.0.1'
+# shogun_port: 37414
 shogun_port: 52800
+# shogun_port: 44602
 
 # Live Link Face
 llf_udp_ip: "192.168.0.246"

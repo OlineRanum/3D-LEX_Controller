@@ -30,7 +30,12 @@ import sys
 import os
 import time
 # get the path to the Shogun SDK
-sys.path.append(r"C:\Program Files\Vicon\ShogunLive1.12\SDK\Python")
+sys.path.append(r"C:\Program Files\Vicon\ShogunLive1.13\SDK\Python\shogun_live_api")
+sys.path.append(r"C:\Program Files\Vicon\ShogunLive1.13\SDK\Python\vicon_core_api")
+
+# Import the shogun_live_api package
+import shogun_live_api
+import vicon_core_api
 
 # get the cur path to current folder for importing shogunPostFuncs
 cur_path = os.path.dirname(os.path.abspath(__file__))
@@ -75,7 +80,7 @@ class Control:
         self.PORT = args.controller_port
 
         # Connect Vicon Core API client to the application.
-        self.vicon_client = Client(self.PC_IP, args.shogun_port)
+        self.vicon_client = Client(self.SHOGUN_IP, args.shogun_port)
         utils.check_connected(self.vicon_client)
         # Create required Shogun Live API services.
         self.vicon_capture_services = CaptureServices(self.vicon_client)
