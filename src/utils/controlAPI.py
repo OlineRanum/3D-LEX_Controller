@@ -125,6 +125,12 @@ class Control:
         """
         Open the last recorded file in Shogun Live.
         """
+        if self.SHOGUN_POST.shogun_post_connection_status == None:
+            self.SHOGUN_POST = spf.ViconShogunPost()
+            if self.SHOGUN_POST.shogun_post_connection_status == None:
+                print("Failed to create Shogun POST connection.")
+                return
+
         self.SHOGUN_POST.CloseFile()
         result = self.SHOGUN_POST.OpenFile(self.last_path)
 
@@ -151,6 +157,7 @@ class Control:
             return
 
         self.OSC_client.send_message("/SendFileNameToTCP", [file_name])
+        self.OSC_client.send_message("/SetFileName", [file_name])
         print(f"Setting the file name to: '{file_name}'")
         self.vicon_capture_services.set_capture_name(file_name)
 

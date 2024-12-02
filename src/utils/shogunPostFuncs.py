@@ -10,8 +10,14 @@ except ImportError as e:
 # Define the class for connecting to Shogun Post
 class ViconShogunPost(object):
     def __init__(self, address="localhost", port=805):
-        self._Client = ViconShogunPostSDK.Client3.TheClient
-        self.Connect(address, port)
+        self.shogun_post_connection_status = None
+        try:
+            self._Client = ViconShogunPostSDK.Client3.TheClient
+            self.Connect(address, port)
+            self.shogun_post_connection_status = "Connected"
+        except Exception as e:
+            print(f"Error starting up Shogun POST Connection: {str(e)}")
+            self.shogun_post_connection_status = None
 
     def __del__(self):
         if self._Client.IsConnected():

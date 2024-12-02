@@ -5,3 +5,4 @@ start cmd /k "title Main Controller & python mainController.py"
 start cmd /k "title Main OSC & python mainOSC.py"
 start cmd /k "title File Receiver & python fileReceiver.py"
 start cmd /k "title Leffe Con & python leffeCon.py"
+
