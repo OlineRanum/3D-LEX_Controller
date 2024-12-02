@@ -20,7 +20,8 @@ shogun_port: 52800
 # shogun_port: 44602
 
 # Live Link Face
-llf_udp_ip: "192.168.0.246"
+llf_udp_ip: "192.168.0.246" # IP of vislabApple
+# llf_udp_ip: "192.168.0.169"
 llf_udp_port: 8006
 
 # Local computer 

@@ -114,8 +114,15 @@ class LiveLinkFaceClient:
         This method sets the file name for capturing on the iPhone server.
         It also resets the capture number.
         """
-        self.gloss = gloss
+        print("Setting filename to: ", gloss)
+        print("ARGS: ", args)
         self.toIphone.send_message("/Slate", [self.gloss])
+
+        # Don't reset the take number if the gloss is the same
+        if self.gloss == gloss:
+            return
+
+        self.gloss = gloss
         self.takenumber = 0
     
     def request_battery(self, *args):
@@ -176,7 +183,7 @@ class LiveLinkFaceServer:
 
         # Start client requests here
         self.dispatcher.map("/BatteryQuery", self.client.request_battery)
-        self.dispatcher.map("/SetFileName", self.client.set_filename)
+        self.dispatcher.map("/SetFileName", lambda address, *args: self.client.set_filename(*args))
         self.dispatcher.map("/RecordStart", self.start_recording)
         self.dispatcher.map("/RecordStop", self.client.stop_capture)
         # When the recording is fully finished, instruct the client to save the file locally
