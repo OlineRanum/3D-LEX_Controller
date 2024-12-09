@@ -37,3 +37,5 @@ websock_port: 8009
 # Path to downloaded vicon SDK module 
 vicon_sdk_path: 'C:\Program Files\Vicon\DataStream SDK\Win64\Python'
 
+camera_mic_name: 'Digital Audio Interface'
+camera_save_path: 'D:\VideoCapture'
