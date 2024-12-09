@@ -4,6 +4,7 @@ import datetime
 import platform
 import re
 import time
+import popUp
 
 class FFmpegRecorder:
     def __init__(self, save_path="./", file_name="recording", video_device="video=UT-VID 00K0626579", audio_device="audio=Digital Audio Interface (UT-AUD 00K0626579)"):
@@ -13,6 +14,7 @@ class FFmpegRecorder:
         self.audio_device = audio_device
         self.recording = False
         self.ffmpeg_process = None  # This will store the subprocess handle
+        self.current_output_file = None
 
     def set_save_location(self, path, date_folder=True):
         """Sets the location to save the recorded files."""
@@ -25,6 +27,42 @@ class FFmpegRecorder:
 
         self.save_path = path
         print(f"[ffmpeg] Save path set to: {self.save_path}")
+
+    def check_last_file(self):
+        """Check the last recorded file and if it is saved. If not print a warning."""
+        if not os.path.exists(self.current_output_file):
+            print(f"[ffmpeg WARNING] Last recorded file '{self.current_output_file}' not found.")
+
+        # Use ffprobe to get the duration of the video
+        try:
+            command = [
+                "ffprobe", "-v", "error", "-show_entries", "format=duration",
+                "-of", "default=noprint_wrappers=1:nokey=1", self.current_output_file
+            ]
+            result = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+            duration = float(result.stdout.strip())
+        except Exception as e:
+            print(f"[ffmpeg WARNING] Unable to determine duration of '{self.current_output_file}': {e}")
+            return
+
+        # Get the file size in MB
+        file_size_mb = os.path.getsize(self.current_output_file) / (1024 * 1024)
+
+        # Expected file size (in MB) based on duration (adjust 2.0 for your average file size per second)
+        avg_size_per_sec = 0.606  # Based on a 1080p 60 FPS video with 5000 kbps bitrate that we have recorded over 22 seconds
+        expected_size_mb = duration * avg_size_per_sec
+
+        # Set a tolerance threshold (e.g., 20% smaller than expected)
+        tolerance_factor = 0.8
+        if file_size_mb < expected_size_mb * tolerance_factor:
+            print(
+                f"[ffmpeg WARNING] File '{self.current_output_file}' might be invalid: "
+                f"size is {file_size_mb:.2f} MB, expected at least {expected_size_mb * tolerance_factor:.2f} MB."
+            )
+            popUp.show_popup("File might be invalid", "File size is less than expected. Please check the file.")
+        else:
+            print(f"[ffmpeg INFO] File '{self.current_output_file}' appears valid: {file_size_mb:.2f} MB.")
+
 
     def get_unique_filename(self):
         """Generates a unique file name by appending a number if the file already exists."""
@@ -137,6 +175,7 @@ class FFmpegRecorder:
         # Start the FFmpeg process and save the process handle
         print(f"[ffmpeg] Recording started: {output_file}")
         self.recording = True
+        self.current_output_file = output_file
         # self.ffmpeg_process = subprocess.Popen(command, stdin=subprocess.PIPE, creationflags=subprocess.CREATE_NEW_PROCESS_GROUP)
         self.ffmpeg_process = subprocess.Popen(command, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         
@@ -155,6 +194,8 @@ class FFmpegRecorder:
         # Stop the FFmpeg process
         print("[ffmpeg] Recording and processing stopped.")
         self.recording = False
+        self.check_last_file()
+        self.current_output_file = None
 
     def __del__(self):
         """Ensure that FFmpeg is stopped when the object is deleted."""
