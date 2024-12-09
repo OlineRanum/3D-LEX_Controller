@@ -242,6 +242,7 @@ if __name__ == "__main__":
     optical_camera = FFmpegRecorder(video_device=args.camera_name, audio_device=args.camera_mic_name, save_path=args.camera_save_path)
     optical_camera.set_save_location(args.camera_save_path)
     optical_camera.set_save_location('D:\\VideoCapture')  # Set your desired save location
+    optical_camera.validate_devices()
 
     # Accept calls, and let the websockt control the controller
     # asyncio.run(start_server(control, args))

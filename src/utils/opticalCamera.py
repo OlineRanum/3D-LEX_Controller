@@ -2,6 +2,7 @@ import os
 import subprocess
 import datetime
 import platform
+import re
 import time
 
 class FFmpegRecorder:
@@ -46,12 +47,68 @@ class FFmpegRecorder:
         self.file_name = name
 
     def list_devices(self):
-        """List available devices using FFmpeg."""
-        if platform.system() == "Windows":
-            command = ['ffmpeg', '-list_devices', 'true', '-f', 'dshow', '-i', 'dummy']
-            subprocess.run(command)
-        else:
-            print("[ffmpeg] Device listing is only supported on Windows.")
+        """List available audio and video devices using FFmpeg."""
+        if platform.system() != "Windows":
+            print("[ffmpeg] Device listing is only supported on Windows. Returning empty list.")
+            return {'audio': [], 'video': []}
+
+        # Command to list devices
+        command = ['ffmpeg', '-list_devices', 'true', '-f', 'dshow', '-i', 'dummy']
+        
+        try:
+            # Run the command and capture stderr (device list is printed to stderr)
+            result = subprocess.run(command, stderr=subprocess.PIPE, text=True)
+            output = result.stderr
+        except FileNotFoundError:
+            print("[ffmpeg ERROR] FFmpeg not found. Make sure it's installed and in your PATH.")
+            return {'audio': [], 'video': []}
+
+        # Parse devices from the FFmpeg output
+        audio_devices, video_devices = [], []
+        current_section = None
+
+        for line in output.splitlines():
+            line = line.strip()
+            if "DirectShow audio devices" in line or "(audio)" in line:
+                current_section = 'audio'
+            elif "DirectShow video devices" in line or "(video)" in line:
+                current_section = 'video'
+            
+            if line.startswith('[dshow @') and '"' in line:
+                # Extract device name inside quotes
+                match = re.search(r'"([^"]+)"', line)
+                if match:
+                    device_name = match.group(1)
+                    if current_section == 'audio':
+                        audio_devices.append(device_name)
+                    elif current_section == 'video':
+                        video_devices.append(device_name)
+        
+        return {'audio': audio_devices, 'video': video_devices}
+
+    def validate_devices(self, given_audio_device=None, given_video_device=None):
+        if given_audio_device is None:
+            given_audio_device = self.audio_device
+        if given_video_device is None:
+            given_video_device = self.video_device
+
+        # Retrieve available devices
+        devices = self.list_devices()
+        audio_devices = devices['audio']
+        video_devices = devices['video']
+
+        # Validate audio device
+        if given_audio_device not in audio_devices:
+            print(f"[ffmpeg ERROR] Audio device '{given_audio_device}' not found. Available devices: {audio_devices}")
+            return False
+
+        # Validate video device
+        if given_video_device not in video_devices:
+            print(f"[ffmpeg ERROR] Video device '{given_video_device}' not found. Available devices: {video_devices}")
+            return False
+        
+        print(f"[ffmpeg] Both {given_video_device} and {given_audio_device} are valid.")
+        return True
 
     def start_record(self):
         """Start the FFmpeg recording using the given devices."""
