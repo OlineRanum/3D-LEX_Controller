@@ -30,9 +30,14 @@ class FFmpegRecorder:
         base_name = self.file_name
         file_extension = ".mp4"
         counter = 1
+
+        if not os.path.exists(os.path.join(self.save_path, f"{base_name}{file_extension}")):
+            return f"{base_name}{file_extension}"
+
         # Generate the unique file name
         while os.path.exists(os.path.join(self.save_path, f"{base_name}_{counter}{file_extension}")):
             counter += 1
+        
         return f"{base_name}_{counter}{file_extension}"
 
     def set_recording_name(self, name):
@@ -59,20 +64,23 @@ class FFmpegRecorder:
         # Construct the FFmpeg command
         command = [
             'ffmpeg',
-            '-f', 'dshow',  # DirectShow input
+            '-f', 'dshow',
             '-i', f'video={self.video_device}:audio={self.audio_device}',  # Input devices
-            '-vf', 'format=yuv420p',  # Video format
-            '-preset', 'fast',  # Encoding preset
-            '-y',  # Overwrite output file if it exists
-            output_file  # Output file
+            '-vf', 'format=yuv420p',  # Set pixel format
+            '-s', '1920x1080',        # Set resolution to 1080p
+            '-r', '60',               # Set frame rate to 60 FPS
+            '-preset', 'fast',        # Encoding preset
+            '-y',                     # Overwrite output file if it exists
+            '-b:v', '5000k',          # Set video bitrate to 5000k (adjust according to your needs)
+            '-shortest',              # Stop recording when the shortest stream ends (video/audio)
+            output_file               # Output file path
         ]
-        
+
         # Start the FFmpeg process and save the process handle
         print(f"Recording started: {output_file}")
         self.recording = True
         # self.ffmpeg_process = subprocess.Popen(command, stdin=subprocess.PIPE, creationflags=subprocess.CREATE_NEW_PROCESS_GROUP)
         self.ffmpeg_process = subprocess.Popen(command, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-
         
     def stop_record(self):
         """Stop the FFmpeg recording."""
@@ -80,14 +88,15 @@ class FFmpegRecorder:
             print("No recording in progress.")
             return
 
-        # Stop the FFmpeg process
-        self.recording = False
-        print("Recording stopped.")
-        
+        time.sleep(1) # Wait for a second before stopping the recording, making sure we have the last frames
         self.ffmpeg_process.communicate(str.encode("q")) #Equivalent to send a Q
-        time.sleep(3) 
+        self.ffmpeg_process.wait() #Wait for the process to finish
         self.ffmpeg_process.terminate() #Terminate the process
         self.ffmpeg_process = None
+
+        # Stop the FFmpeg process
+        print("Recording and processing stopped.")
+        self.recording = False
 
     def __del__(self):
         """Ensure that FFmpeg is stopped when the object is deleted."""
@@ -99,7 +108,7 @@ class FFmpegRecorder:
 if __name__ == "__main__":
     recorder = FFmpegRecorder(save_path="./", file_name="test_recording", video_device="UT-VID 00K0626579", audio_device="Digital Audio Interface (UT-AUD 00K0626579)")
     recorder.set_save_location('D:\\VideoCapture')  # Set your desired save location
-    recorder.set_recording_name("test_11")
+    recorder.set_recording_name("recordingTEST")
 
     # List devices (optional, useful for discovering available devices)
     # recorder.list_devices()
