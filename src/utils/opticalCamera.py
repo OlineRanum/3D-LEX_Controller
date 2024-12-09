@@ -23,7 +23,7 @@ class FFmpegRecorder:
             os.makedirs(path, exist_ok=True)
 
         self.save_path = path
-        print(f"Save path set to: {self.save_path}")
+        print(f"[ffmpeg] Save path set to: {self.save_path}")
 
     def get_unique_filename(self):
         """Generates a unique file name by appending a number if the file already exists."""
@@ -42,6 +42,7 @@ class FFmpegRecorder:
 
     def set_recording_name(self, name):
         """Sets the name of the recording file."""
+        print(f"[ffmpeg] Recording name set to: {name}")
         self.file_name = name
 
     def list_devices(self):
@@ -50,12 +51,12 @@ class FFmpegRecorder:
             command = ['ffmpeg', '-list_devices', 'true', '-f', 'dshow', '-i', 'dummy']
             subprocess.run(command)
         else:
-            print("Device listing is only supported on Windows.")
+            print("[ffmpeg] Device listing is only supported on Windows.")
 
     def start_record(self):
         """Start the FFmpeg recording using the given devices."""
         if self.recording:
-            print("Already recording!")
+            print("[ffmpeg] Recorder already recording!")
             return
 
         # Build the output file path
@@ -77,7 +78,7 @@ class FFmpegRecorder:
         ]
 
         # Start the FFmpeg process and save the process handle
-        print(f"Recording started: {output_file}")
+        print(f"[ffmpeg] Recording started: {output_file}")
         self.recording = True
         # self.ffmpeg_process = subprocess.Popen(command, stdin=subprocess.PIPE, creationflags=subprocess.CREATE_NEW_PROCESS_GROUP)
         self.ffmpeg_process = subprocess.Popen(command, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -85,7 +86,7 @@ class FFmpegRecorder:
     def stop_record(self):
         """Stop the FFmpeg recording."""
         if not self.recording:
-            print("No recording in progress.")
+            print("[ffmpeg] No recording in progress.")
             return
 
         time.sleep(1) # Wait for a second before stopping the recording, making sure we have the last frames
@@ -95,7 +96,7 @@ class FFmpegRecorder:
         self.ffmpeg_process = None
 
         # Stop the FFmpeg process
-        print("Recording and processing stopped.")
+        print("[ffmpeg] Recording and processing stopped.")
         self.recording = False
 
     def __del__(self):
@@ -104,15 +105,15 @@ class FFmpegRecorder:
             self.stop_record()
 
 
-# Usage Example
-if __name__ == "__main__":
-    recorder = FFmpegRecorder(save_path="./", file_name="test_recording", video_device="UT-VID 00K0626579", audio_device="Digital Audio Interface (UT-AUD 00K0626579)")
-    recorder.set_save_location('D:\\VideoCapture')  # Set your desired save location
-    recorder.set_recording_name("recordingTEST")
+# # Usage Example
+# if __name__ == "__main__":
+#     recorder = FFmpegRecorder(save_path="./", file_name="test_recording", video_device="UT-VID 00K0626579", audio_device="Digital Audio Interface (UT-AUD 00K0626579)")
+#     recorder.set_save_location('D:\\VideoCapture')  # Set your desired save location
+#     recorder.set_recording_name("OCHTEND-D_241209_4")
 
-    # List devices (optional, useful for discovering available devices)
-    # recorder.list_devices()
+#     # List devices (optional, useful for discovering available devices)
+#     # recorder.list_devices()
 
-    recorder.start_record()
-    time.sleep(5)  # Simulate 5 seconds of recording
-    recorder.stop_record()
+#     recorder.start_record()
+#     time.sleep(5)  # Simulate 5 seconds of recording
+#     recorder.stop_record()

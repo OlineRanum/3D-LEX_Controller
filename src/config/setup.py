@@ -10,6 +10,7 @@ class SetUp:
         self.__load_hotkeys()
         self.__load_host_info()
         self.__load_paths()
+        self.__load_optical_camera_configs()
 
     def __load_vicon(self):
         self.vicon_sdk_path = self.args['vicon_sdk_path']
@@ -43,6 +44,10 @@ class SetUp:
     def __load_paths(self):
         self.output_dir = self.args['output_dir']
 
+    def __load_optical_camera_configs(self):
+        self.camera_name = self.args['camera_name']
+        self.camera_mic_name = self.args['camera_mic_name']
+        self.camera_save_path = self.args['camera_save_path']
 
 
 if __name__ == "__main__":

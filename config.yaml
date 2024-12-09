@@ -38,5 +38,5 @@ websock_port: 8009
 vicon_sdk_path: 'C:\Program Files\Vicon\DataStream SDK\Win64\Python'
 
 camera_name: 'UT-VID 00K0626579'
-camera_mic_name: 'Digital Audio Interface'
+camera_mic_name: 'Digital Audio Interface (UT-AUD 00K0626579)'
 camera_save_path: 'D:\VideoCapture'
