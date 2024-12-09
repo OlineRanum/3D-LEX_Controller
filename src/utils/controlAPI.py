@@ -97,10 +97,13 @@ class Control:
         self.OSC_client.send_message("/RecordStart", [])
         self.vicon_capture_services.start_capture()
 
-    def stop_record_osc_shogun(self):
+    async def stop_record_osc_shogun(self):
         """
         Stop recording via OSC and Shogun.
         """
+        print("[OSC] Stopping the recording...")
+        print("[Shogun] Stopping the recording...")
+
         folder = self.get_capture_folder_shogun()[1]
         name = self.vicon_capture_services.capture_name()[1]
         self.last_path = folder + "\\" + name + ".mcp"
