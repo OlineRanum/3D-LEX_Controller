@@ -98,16 +98,24 @@ async def handle_stop(websocket, control, optical_camera, message):
     Returns:
     None
     """
-    print("[main] Asking OSC and Shogun to STOP record...")
-    control.stop_record_osc_shogun()
+    print("[main] Asking OSC, Shogun and camera to STOP record...")
 
-    print("[main] Asking optical camera to STOP record...")
     try:
-        optical_camera.stop_record()
+        # Run both stop operations concurrently and wait for them to finish
+        await asyncio.gather(
+            optical_camera.stop_record(),  # Stop the optical camera recording
+            control.stop_record_osc_shogun(),  # Stop the OSC and Shogun recording
+        )
     except Exception as e:
-        print(f"[main] Error stopping optical camera: {e}")
+        print(f"[main ERROR] stopping recordings: {e}")
 
-    await websocket.send("stopping")
+    # Send the "stopping" message to the client after both tasks are done
+    try:
+        await websocket.send("stopping")
+    except websockets.exceptions.ConnectionClosedOK:
+        print("[main] WebSocket connection already closed.")
+    except Exception as e:
+        print(f"[main ERROR] sending message: {e}")
 
 
 async def handle_ping(websocket, control, message):

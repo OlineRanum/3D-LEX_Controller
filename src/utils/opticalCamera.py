@@ -4,6 +4,8 @@ import datetime
 import platform
 import re
 import time
+import asyncio
+import threading
 
 class FFmpegRecorder:
     def __init__(self, save_path="./", file_name="recording", video_device="video=UT-VID 00K0626579", audio_device="audio=Digital Audio Interface (UT-AUD 00K0626579)", popUp=None):
@@ -153,8 +155,9 @@ class FFmpegRecorder:
     def start_record(self):
         """Start the FFmpeg recording using the given devices."""
         if self.recording:
-            print("[ffmpeg] Recorder already recording!")
-            return
+            print("[ffmpeg] Recorder already recording! Stopping the current recording, then starting a new one.")
+            # TODO FIX THE STOPPING OF THE RECORDING LOOP
+            self.popup.show_popup("Recording Warning", "RESTART THE PROGRAM, recorder is stuck in loop")
 
         # Build the output file path
         output_file = os.path.join(self.save_path, self.get_unique_filename())
@@ -167,9 +170,9 @@ class FFmpegRecorder:
             '-vf', 'format=yuv420p',  # Set pixel format
             '-s', '1920x1080',        # Set resolution to 1080p
             '-r', '60',               # Set frame rate to 60 FPS
-            '-preset', 'fast',        # Encoding preset
+            '-preset', 'ultrafast',   # Encoding preset
             '-y',                     # Overwrite output file if it exists
-            '-b:v', '5000k',          # Set video bitrate to 5000k (adjust according to your needs)
+            '-b:v', '3000k',          # Lower video bitrate
             '-shortest',              # Stop recording when the shortest stream ends (video/audio)
             output_file               # Output file path
         ]
@@ -181,23 +184,60 @@ class FFmpegRecorder:
         # self.ffmpeg_process = subprocess.Popen(command, stdin=subprocess.PIPE, creationflags=subprocess.CREATE_NEW_PROCESS_GROUP)
         self.ffmpeg_process = subprocess.Popen(command, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         
-    def stop_record(self):
+    async def stop_record(self):
         """Stop the FFmpeg recording."""
         if not self.recording:
             print("[ffmpeg] No recording in progress.")
-            return
+            return False
 
-        time.sleep(1) # Wait for a second before stopping the recording, making sure we have the last frames
-        self.ffmpeg_process.communicate(str.encode("q")) #Equivalent to send a Q
-        self.ffmpeg_process.wait() #Wait for the process to finish
-        self.ffmpeg_process.terminate() #Terminate the process
-        self.ffmpeg_process = None
+        print("[ffmpeg] Stopping the optical camera...")
+        # await asyncio.sleep(0.5) # Wait for half a second before stopping the recording, making sure we have the last frames
 
-        # Stop the FFmpeg process
-        print("[ffmpeg] Recording and processing stopped.")
-        self.recording = False
-        self.check_last_file()
-        self.current_output_file = None
+        # Offload the FFmpeg stop to a separate thread so it doesn't block the event loop
+        await asyncio.to_thread(self.stop_ffmpeg())
+
+    def stop_ffmpeg(self):
+        """This function will run in a separate thread to stop FFmpeg."""
+        try:
+            # Perform the blocking FFmpeg operations
+            self.ffmpeg_process.communicate(str.encode("q"))  # Send a 'q' to stop
+            self.ffmpeg_process.wait()  # Wait for FFmpeg to finish
+            # self.ffmpeg_process.terminate()  # Terminate the FFmpeg process
+        except Exception as e:
+            print(f"[ffmpeg] Error while stopping FFmpeg: {e}")
+        finally:
+            self.ffmpeg_process = None
+            self.check_last_file()
+            # After stopping FFmpeg, do the final cleanup
+            print("[ffmpeg] Recording and processing stopped.")
+            self.recording = False
+            self.current_output_file = None
+
+    # def _stop_ffmpeg_in_thread(self):
+    #     """Run the blocking FFmpeg stop operations in a separate thread."""
+    #     loop = asyncio.get_event_loop()
+
+    #     def stop_ffmpeg():
+    #         """This function will run in a separate thread to stop FFmpeg."""
+    #         try:
+    #             # Perform the blocking FFmpeg operations
+    #             self.ffmpeg_process.communicate(str.encode("q"))  # Send a 'q' to stop
+    #             self.ffmpeg_process.wait()  # Wait for FFmpeg to finish
+    #             self.ffmpeg_process.terminate()  # Terminate the FFmpeg process
+    #         except Exception as e:
+    #             print(f"[ffmpeg] Error while stopping FFmpeg: {e}")
+    #         finally:
+    #             self.ffmpeg_process = None
+
+    #         # Once FFmpeg stops, call back to the event loop to handle cleanup
+    #         loop.call_soon_threadsafe(self._on_ffmpeg_stopped)
+
+    #     # Start the FFmpeg stop process in a separate thread
+    #     threading.Thread(target=stop_ffmpeg, daemon=True).start()
+
+    # def _on_ffmpeg_stopped(self):
+    #     """Callback after FFmpeg has stopped."""
+    #     self.check_last_file()
 
     def __del__(self):
         """Ensure that FFmpeg is stopped when the object is deleted."""
