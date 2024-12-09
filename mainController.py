@@ -31,6 +31,7 @@ import websockets
 from src.config.setup import SetUp
 from src.utils.controlAPI import Control
 from src.utils.opticalCamera import FFmpegRecorder
+from src.utils.popUp import PopUp
 import functools
 import os
 import ssl
@@ -238,8 +239,9 @@ if __name__ == "__main__":
     # Create controller object
     control = Control(args)
 
+    popUp = PopUp()
     # Start the optical camera
-    optical_camera = FFmpegRecorder(video_device=args.camera_name, audio_device=args.camera_mic_name, save_path=args.camera_save_path)
+    optical_camera = FFmpegRecorder(video_device=args.camera_name, audio_device=args.camera_mic_name, save_path=args.camera_save_path, popUp=popUp)
     optical_camera.set_save_location(args.camera_save_path)
     optical_camera.set_save_location('D:\\VideoCapture')  # Set your desired save location
     optical_camera.validate_devices()

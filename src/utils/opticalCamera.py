@@ -4,10 +4,9 @@ import datetime
 import platform
 import re
 import time
-import popUp
 
 class FFmpegRecorder:
-    def __init__(self, save_path="./", file_name="recording", video_device="video=UT-VID 00K0626579", audio_device="audio=Digital Audio Interface (UT-AUD 00K0626579)"):
+    def __init__(self, save_path="./", file_name="recording", video_device="video=UT-VID 00K0626579", audio_device="audio=Digital Audio Interface (UT-AUD 00K0626579)", popUp=None):
         self.save_path = save_path
         self.file_name = file_name
         self.video_device = video_device
@@ -15,6 +14,7 @@ class FFmpegRecorder:
         self.recording = False
         self.ffmpeg_process = None  # This will store the subprocess handle
         self.current_output_file = None
+        self.popup = popUp
 
     def set_save_location(self, path, date_folder=True):
         """Sets the location to save the recorded files."""
@@ -55,11 +55,13 @@ class FFmpegRecorder:
         # Set a tolerance threshold (e.g., 20% smaller than expected)
         tolerance_factor = 0.8
         if file_size_mb < expected_size_mb * tolerance_factor:
-            print(
+            warning_message = (
                 f"[ffmpeg WARNING] File '{self.current_output_file}' might be invalid: "
                 f"size is {file_size_mb:.2f} MB, expected at least {expected_size_mb * tolerance_factor:.2f} MB."
             )
-            popUp.show_popup("File might be invalid", "File size is less than expected. Please check the file.")
+            print(warning_message)
+            if self.popup is not None:
+                self.popup.show_popup("File Size Warning", warning_message)
         else:
             print(f"[ffmpeg INFO] File '{self.current_output_file}' appears valid: {file_size_mb:.2f} MB.")
 
