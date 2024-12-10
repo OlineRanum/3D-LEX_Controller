@@ -103,8 +103,8 @@ async def handle_stop(websocket, control, optical_camera, message):
     try:
         # Run both stop operations concurrently and wait for them to finish
         await asyncio.gather(
-            optical_camera.stop_record(),  # Stop the optical camera recording
-            control.stop_record_osc_shogun(),  # Stop the OSC and Shogun recording
+            asyncio.to_thread(optical_camera.stop_record),
+            asyncio.to_thread(control.stop_record_osc_shogun),
         )
     except Exception as e:
         print(f"[main ERROR] stopping recordings: {e}")

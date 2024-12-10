@@ -5,7 +5,7 @@ import platform
 import re
 import time
 import asyncio
-import threading
+from threading import Thread
 
 class FFmpegRecorder:
     def __init__(self, save_path="./", file_name="recording", video_device="video=UT-VID 00K0626579", audio_device="audio=Digital Audio Interface (UT-AUD 00K0626579)", popUp=None):
@@ -51,7 +51,7 @@ class FFmpegRecorder:
         file_size_mb = os.path.getsize(self.current_output_file) / (1024 * 1024)
 
         # Expected file size (in MB) based on duration (adjust 2.0 for your average file size per second)
-        avg_size_per_sec = 0.606  # Based on a 1080p 60 FPS video with 5000 kbps bitrate that we have recorded over 22 seconds
+        avg_size_per_sec = 0.470  # Based on a 1080p 60 FPS video with 5000 kbps bitrate that we have recorded over 22 seconds
         expected_size_mb = duration * avg_size_per_sec
 
         # Set a tolerance threshold (e.g., 20% smaller than expected)
@@ -170,9 +170,9 @@ class FFmpegRecorder:
             '-vf', 'format=yuv420p',  # Set pixel format
             '-s', '1920x1080',        # Set resolution to 1080p
             '-r', '60',               # Set frame rate to 60 FPS
-            '-preset', 'ultrafast',   # Encoding preset
+            '-preset', 'fast',        # Encoding preset
             '-y',                     # Overwrite output file if it exists
-            '-b:v', '3000k',          # Lower video bitrate
+            '-b:v', '5000k',          # Lower video bitrate
             '-shortest',              # Stop recording when the shortest stream ends (video/audio)
             output_file               # Output file path
         ]
@@ -184,7 +184,7 @@ class FFmpegRecorder:
         # self.ffmpeg_process = subprocess.Popen(command, stdin=subprocess.PIPE, creationflags=subprocess.CREATE_NEW_PROCESS_GROUP)
         self.ffmpeg_process = subprocess.Popen(command, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         
-    async def stop_record(self):
+    def stop_record(self):
         """Stop the FFmpeg recording."""
         if not self.recording:
             print("[ffmpeg] No recording in progress.")
@@ -193,20 +193,24 @@ class FFmpegRecorder:
         print("[ffmpeg] Stopping the optical camera...")
         # await asyncio.sleep(0.5) # Wait for half a second before stopping the recording, making sure we have the last frames
 
-        # Offload the FFmpeg stop to a separate thread so it doesn't block the event loop
-        await asyncio.to_thread(self.stop_ffmpeg())
+        # Start stopping FFmpeg in a separate thread
+        thread = Thread(target=self.stop_ffmpeg, args=(self.ffmpeg_process,))
+        thread.start()
 
-    def stop_ffmpeg(self):
+        self.ffmpeg_process = None
+        return True
+
+    def stop_ffmpeg(self, ffmpeg_process):
         """This function will run in a separate thread to stop FFmpeg."""
         try:
             # Perform the blocking FFmpeg operations
-            self.ffmpeg_process.communicate(str.encode("q"))  # Send a 'q' to stop
-            self.ffmpeg_process.wait()  # Wait for FFmpeg to finish
+            ffmpeg_process.communicate(str.encode("q"))  # Send a 'q' to stop
+            ffmpeg_process.wait()  # Wait for FFmpeg to finish
             # self.ffmpeg_process.terminate()  # Terminate the FFmpeg process
         except Exception as e:
             print(f"[ffmpeg] Error while stopping FFmpeg: {e}")
         finally:
-            self.ffmpeg_process = None
+            ffmpeg_process = None
             self.check_last_file()
             # After stopping FFmpeg, do the final cleanup
             print("[ffmpeg] Recording and processing stopped.")

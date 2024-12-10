@@ -97,7 +97,7 @@ class Control:
         self.OSC_client.send_message("/RecordStart", [])
         self.vicon_capture_services.start_capture()
 
-    async def stop_record_osc_shogun(self):
+    def stop_record_osc_shogun(self):
         """
         Stop recording via OSC and Shogun.
         """
