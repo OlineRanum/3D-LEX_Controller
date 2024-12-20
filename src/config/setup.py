@@ -45,9 +45,17 @@ class SetUp:
         self.output_dir = self.args['output_dir']
 
     def __load_optical_camera_configs(self):
-        self.camera_name = self.args['camera_name']
-        self.camera_mic_name = self.args['camera_mic_name']
-        self.camera_save_path = self.args['camera_save_path']
+        self.camera_names = []
+        self.camera_mic_names = []
+        self.camera_save_paths = []
+        # Check how many optical cameras there are and save them to the camera list
+
+        cur_camera = 1
+        while 'camera_name_' + str(cur_camera) in self.args:
+            self.camera_names.append(self.args['camera_name_' + str(cur_camera)])
+            self.camera_mic_names.append(self.args['camera_mic_name_' + str(cur_camera)])
+            self.camera_save_paths.append(self.args['camera_save_path_' + str(cur_camera)])
+            cur_camera += 1
 
 
 if __name__ == "__main__":

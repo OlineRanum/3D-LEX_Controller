@@ -21,6 +21,7 @@ shogun_port: 52800
 
 # Live Link Face
 # llf_udp_ip: "192.168.0.246" # IP of vislabApple
+# llf_udp_ip: "192.168.0.204" # IP of vislabApple
 llf_udp_ip: "192.168.0.173" # IP of SignLabApple
 llf_udp_port: 8006 # Port to connect the Iphones to the computer
 
@@ -37,6 +38,22 @@ websock_port: 8009
 # Path to downloaded vicon SDK module 
 vicon_sdk_path: 'C:\Program Files\Vicon\DataStream SDK\Win64\Python'
 
-camera_name: 'UT-VID 00K0626579'
-camera_mic_name: 'Digital Audio Interface (UT-AUD 00K0626579)'
-camera_save_path: 'D:\VideoCapture'
+# If more cameras are required, add more camera configurations with iterative numbers.
+# List the available cameras and their respective microphones with the following command: ffmpeg -list_devices true -f dshow -i dummy
+camera_name_1: 'UT-VID 00K0626579'
+camera_mic_name_1: 'Digital Audio Interface (UT-AUD 00K0626579)'
+camera_save_path_1: 'D:\VideoCapture\Canon1'
+
+# camera_name_2: '@device_pnp_\\?\usb#vid_1f6a&pid_15ae&mi_00#6&a1a60da&0&0000#{65e8773d-8f56-11d0-a3b9-00a0c9223196}\global'
+# camera_mic_name_2: '@device_cm_{33D9A762-90C8-11D0-BD43-00A0C911CE86}\wave_{97FF0363-9EA5-4292-9BA2-918B2CBAD469}'
+# camera_save_path_2: 'D:\VideoCapture\KiyoPro1'
+
+
+# camera_name_3: 'UT-VID 00K0626579'
+# camera_mic_name_3: 'Digital Audio Interface (UT-AUD 00K0626579)'
+# camera_save_path_3: 'D:\VideoCapture'
+
+# camera_name_4: 'UT-VID 00K0626579'
+# camera_mic_name_4: 'Digital Audio Interface (UT-AUD 00K0626579)'
+# camera_save_path_4: 'D:\VideoCapture'
+
