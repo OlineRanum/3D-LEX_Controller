@@ -85,7 +85,7 @@ class Control:
         # Create required Shogun Live API services.
         self.vicon_capture_services = CaptureServices(self.vicon_client)
 
-        self.SHOGUN_POST = spf.ViconShogunPost()
+        # self.SHOGUN_POST = spf.ViconShogunPost()
         self.last_path = self.get_capture_folder_shogun()
 
         print("Control API for Vicon Shogun Live initialized.")
@@ -122,7 +122,7 @@ class Control:
         self.OSC_client.send_message("/RecordStop", [])
         result = self.vicon_capture_services.stop_capture(0)
         print(f"Recording stopped. Result: {result}")
-        self.open_last_file_shogun()
+        # self.open_last_file_shogun()
 
     def open_last_file_shogun(self):
         """
