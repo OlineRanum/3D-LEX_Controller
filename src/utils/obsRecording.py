@@ -3,6 +3,7 @@ import os
 import shutil
 from datetime import datetime
 import obsws_python as obs
+import popUp as popUp
 
 # OBS WebSocket connection details
 HOST = 'localhost'
@@ -16,10 +17,14 @@ class OBSController:
         self.port = port
         self.password = password
         self.buffer_folder = r"D:\VideoCapture\SourceRecordBuffer"
+        self.last_gloss_name = None
 
         self.check_connection()
         self.ws = None  # Initialize the client without parameters
         self.connect()
+
+    def set_buffer_folder(self, folder_path):
+        self.buffer_folder = folder_path
 
     def check_connection(self):
         import websocket
@@ -44,11 +49,20 @@ class OBSController:
     def list_methods(self):
         # Print available methods/attributes of the ReqClient object
         print(dir(self.ws))
+
     def set_save_location(self, root_folder, gloss_name="Recording"):
         """Sets the location to save the recorded files dynamically with incremental folders."""
         if not os.path.exists(root_folder):
-            raise ValueError(f"Root path '{root_folder}' does not exist.")
-        
+            # Pop up a warning if the folder does not exist, and ask the user if they want to create it
+            popup = popUp.PopUp()
+            create = popup.show_popup_yesno("Warning", f"The folder '{root_folder}' does not exist. Do you want to create it?")
+            if not create:
+                raise ValueError(f"Root path '{root_folder}' does not exist.")
+            else:
+                os.makedirs(root_folder, exist_ok=True)
+
+        self.last_gloss_name = gloss_name
+
         # Create a date folder under the root folder
         date_folder = os.path.join(root_folder, datetime.now().strftime("%Y-%m-%d"))
         os.makedirs(date_folder, exist_ok=True)
@@ -108,6 +122,25 @@ class OBSController:
         except Exception as e:
             print(f"Failed to move the files: {e}")
 
+    def prepend_gloss_name_last_recordings(self, gloss_name=None):
+        """Prepend the gloss name to the last recorded files."""
+        if not self.last_used_folder:
+            print("No folder set for the recording. Can't prepend the gloss name.")
+            return
+        
+        if not gloss_name:
+            gloss_name = self.last_gloss_name
+
+        try:
+            for filename in os.listdir(self.last_used_folder):
+                file_path = os.path.join(self.last_used_folder, filename)
+                if os.path.isfile(file_path):
+                    new_filename = f"{gloss_name}_{filename}"
+                    os.rename(file_path, os.path.join(self.last_used_folder, new_filename))
+                    print(f"Renamed {filename} to {new_filename}")
+        except Exception as e:
+            print(f"Failed to rename the files: {e}")
+
     def disconnect(self):
         self.ws.disconnect()
         print("Disconnected from OBS WebSocket.")
@@ -124,6 +157,7 @@ class OBSController:
             self.ws.stop_record()
             print("Stopped recording.")
             self.move_recorded_files()
+            self.prepend_gloss_name_last_recordings()
         except Exception as e:
             print(f"Failed to stop recording: {e}")
 
@@ -133,7 +167,7 @@ if __name__ == '__main__':
     obs = OBSController(HOST, PORT, PASSWORD)
 
     try:
-        obs.set_save_location(r"D:\VideoCapture\test", gloss_name="testGloss2")
+        obs.set_save_location(r"D:\VideoCapture\testingOBSRecordScript", gloss_name="gloss2")
 
         # Start recording for each scene (one at a time for simplicity)
         obs.start_recording()
