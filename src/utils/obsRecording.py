@@ -1,4 +1,12 @@
 class OBSController:
+    """
+    Controls the OBS WebSocket connection and recording functionality.
+    It also manages the storage of recorded files in a dynamic folder structure.
+    To this end it uses 3 internal components:
+    - ConnectionManager: Manages the connection to the OBS WebSocket server.
+    - RecordingController: Controls the recording functionality in OBS.
+    - FileManagementController: Manages the recorded files and their storage locations.
+    """
     def __init__(self, host, port, password, popUp=None):
         print("Initializing OBS Controller...")
         self.host = host
@@ -50,6 +58,7 @@ class OBSController:
 
     # Internal Components
     class ConnectionManager:
+        """Manages the connection to the OBS WebSocket server."""
         def __init__(self, parent):
             self.parent = parent
 
@@ -81,6 +90,7 @@ class OBSController:
                 print("Disconnected from OBS WebSocket.")
 
     class RecordingController:
+        """Controls the recording functionality in OBS."""
         def __init__(self, parent):
             self.parent = parent
 
@@ -117,6 +127,7 @@ class OBSController:
                 print(f"Failed to stop recording: {e}")
 
     class FileManagementController:
+        """Manages the recorded files and their storage locations."""
         def __init__(self, parent):
             self.parent = parent
             self.buffer_folder = r"D:\VideoCapture\SourceRecordBuffer"
