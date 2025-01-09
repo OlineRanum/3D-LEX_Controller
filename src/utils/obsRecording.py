@@ -151,6 +151,7 @@ class OBSController:
             self.buffer_folder = r"D:\VideoCapture\SourceRecordBuffer"
             self.last_gloss_name = None
             self.last_used_folder = None
+            self.last_used_root_folder = None
 
         def set_buffer_folder(self, path):
             """Sets the location to store the recorded files temporarily."""
@@ -166,6 +167,9 @@ class OBSController:
             import os
             from datetime import datetime
 
+            if root_folder == None:
+                root_folder = self.last_used_root_folder
+
             if not os.path.exists(root_folder):
                 create = self.parent.popUp.show_popup_yesno(
                     "Warning", f"The folder '{root_folder}' does not exist. Do you want to create it?"
@@ -174,7 +178,8 @@ class OBSController:
                     raise ValueError(f"[OBS ERROR] Root path '{root_folder}' does not exist.")
                 else:
                     os.makedirs(root_folder, exist_ok=True)
-
+            
+            self.last_used_root_folder = root_folder
             self.last_gloss_name = gloss_name
 
             # Create a date folder under the root folder
