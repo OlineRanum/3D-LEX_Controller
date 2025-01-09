@@ -27,6 +27,7 @@ In windows, double click the job.bat script to launch all servers simultaneously
 ---
 
 ## Recording with Optical Cameras through OBS
+The OBS portion of the program allows us to record with optical cameras through OBS. This section goes over prerequisites and steps to properly setup OBS.
 
 ### Prerequisites
 - **OBS Version**: 26.0 or higher
@@ -55,12 +56,14 @@ In windows, double click the job.bat script to launch all servers simultaneously
      3. Set the **Record Mode** to `Recording`.
      4. Specify the path to a `buffer_folder` (default: `D:/VideoCapture/SourceRecordBuffer`).
      5. Modify the default file name to ensure it doesn’t collide with other cameras' recordings.
+     6. (Optional) If you want file splitting based on recording time or size, you can set this here.
 
 
 #### Step 3: Select the Main Camera
 - During a recording session, ensure the **main camera scene** is selected in OBS. 
   - This camera will record directly through OBS.
   - Other cameras will record via the Source Record plugin.
+  - (Optional) In the advanced output settings, under record, you can set automatic file splitting if needed.
 
 
 #### Step 4: Update the Configuration File

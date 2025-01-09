@@ -1,3 +1,12 @@
+from enum import Enum
+
+class OBSStatus(Enum):
+    NOT_CONNECTED = "Not connected to OBS"
+    CONNECTED = "Connected to OBS"
+    RECORDING_STARTED = "Recording started"
+    RECORDING_STOPPED = "Recording stopped"
+    ERROR = "Error"
+
 class OBSController:
     """
     Controls the OBS WebSocket connection and recording functionality.
@@ -8,7 +17,7 @@ class OBSController:
     - FileManagementController: Manages the recorded files and their storage locations.
     """
     def __init__(self, host, port, password, popUp=None):
-        print("Initializing OBS Controller...")
+        print("[OBS] Initializing OBS Controller...")
         self.host = host
         self.port = port
         self.password = password
@@ -17,14 +26,19 @@ class OBSController:
 
         # Internal components
         self.connection_manager = self.ConnectionManager(self)
-        self.connection_manager.check_connection()
-        self.connection_manager.connect()
-        self.recording_controller = self.RecordingController(self)
-        self.file_manager = self.FileManagementController(self)
+        if self.connection_manager.check_connection():
+            self.connection_manager.connect()
+            self.recording_controller = self.RecordingController(self)
+            self.file_manager = self.FileManagementController(self)
+            self.statusCode = OBSStatus.CONNECTED
+        else:
+            self.recording_controller = None
+            self.file_manager = None
+            self.statusCode = OBSStatus.NOT_CONNECTED
 
     # Public Methods (Delegation)
     def check_connection(self):
-        self.connection_manager.check_connection()
+        return self.connection_manager.check_connection()
 
     def connect(self):
         self.connection_manager.connect()
@@ -36,7 +50,7 @@ class OBSController:
         if self.ws:
             self.recording_controller.start_recording()
         else:
-            print("Not connected to OBS WebSocket. Cannot start recording.")
+            print("[OBS ERROR] Not connected to OBS WebSocket. Cannot start recording.")
 
     def stop_recording(self):
         self.recording_controller.stop_recording()
@@ -66,10 +80,12 @@ class OBSController:
             import websocket
             try:
                 ws = websocket.create_connection(f"ws://{self.parent.host}:{self.parent.port}")
-                print("Should be able to connect to OBS webserver!")
+                print("[OBS] Should be able to connect to OBS webserver!")
                 ws.close()
+                return True
             except Exception as e:
-                print(f"You cannot connect to the OBS webserver: {e}")
+                print(f"[OBS ERROR] You cannot connect to the OBS webserver: {e}")
+                return False
 
         def connect(self):
             import obsws_python as obs
@@ -80,14 +96,14 @@ class OBSController:
                     )
                 else:
                     self.parent.ws = obs.ReqClient(host=self.parent.host, port=self.parent.port)
-                print("Connected to OBS WebSocket.")
+                print("[OBS] Connected to OBS WebSocket.")
             except Exception as e:
-                print(f"Failed to connect to OBS: {e}")
+                print(f"[OBS ERROR] Failed to connect to OBS: {e}")
 
         def disconnect(self):
             if self.parent.ws:
                 self.parent.ws.disconnect()
-                print("Disconnected from OBS WebSocket.")
+                print("[OBS] Disconnected from OBS WebSocket.")
 
     class RecordingController:
         """Controls the recording functionality in OBS."""
@@ -96,35 +112,37 @@ class OBSController:
 
         def set_record_directory(self, path):
             if not self.parent.ws:
-                print("WebSocket connection not established. Cannot set record directory.")
+                print("[OBS ERROR] WebSocket connection not established. Cannot set record directory.")
                 return
             try:
                 self.parent.ws.set_record_directory(path)
                 print(f"[OBS] Recording directory set to: {path}")
             except Exception as e:
-                print(f"Failed to set recording directory in OBS: {e}")
+                print(f"[OBS ERROR] Failed to set recording directory in OBS: {e}")
 
         def start_recording(self):
             if not self.parent.ws:
-                print("WebSocket connection not established. Cannot start recording.")
+                print("[OBS ERROR} WebSocket connection not established. Cannot start recording.")
                 return
             try:
                 self.parent.ws.start_record()
-                print("Started recording.")
+                print("[OBS] Started recording.")
+                self.parent.statusCode = OBSStatus.RECORDING_STARTED
             except Exception as e:
-                print(f"Failed to start recording: {e}")
+                print(f"[OBS ERROR] Failed to start recording: {e}")
 
         def stop_recording(self):
             if not self.parent.ws:
-                print("WebSocket connection not established. Cannot stop recording.")
+                print("[OBS ERROR] WebSocket connection not established. Cannot stop recording.")
                 return
             try:
                 self.parent.ws.stop_record()
-                print("Stopped recording.")
+                print("[OBS] Stopped recording.")
                 self.parent.file_manager.move_recorded_files()
                 self.parent.file_manager.prepend_gloss_name_last_recordings()
+                self.parent.statusCode = OBSStatus.RECORDING_STOPPED
             except Exception as e:
-                print(f"Failed to stop recording: {e}")
+                print(f"[OBS ERROR] Failed to stop recording: {e}")
 
     class FileManagementController:
         """Manages the recorded files and their storage locations."""
@@ -153,7 +171,7 @@ class OBSController:
                     "Warning", f"The folder '{root_folder}' does not exist. Do you want to create it?"
                 )
                 if not create:
-                    raise ValueError(f"Root path '{root_folder}' does not exist.")
+                    raise ValueError(f"[OBS ERROR] Root path '{root_folder}' does not exist.")
                 else:
                     os.makedirs(root_folder, exist_ok=True)
 
@@ -188,7 +206,7 @@ class OBSController:
             import time
 
             if not self.last_used_folder:
-                print("No folder set for the recording. Can't move the files.")
+                print("[OBS ERROR] No folder set for the recording. Can't move the files.")
                 return
 
             try:
@@ -200,16 +218,16 @@ class OBSController:
                         while retries < max_retries:
                             try:
                                 shutil.move(file_path, destination)
-                                print(f"Moved {filename} to {self.last_used_folder}")
+                                print(f"[OBS] Moved {filename} to {self.last_used_folder}")
                                 break
                             except PermissionError as e:
-                                print(f"Error moving {filename}: {e}. Retrying in {delay} seconds...")
+                                print(f"[OBS ERROR] Error moving {filename}: {e}. Retrying in {delay} seconds...")
                                 retries += 1
                                 time.sleep(delay)
                                 if retries == max_retries:
-                                    print(f"Failed to move {filename} after {max_retries} retries.")
+                                    print(f"[OBS ERROR] Failed to move {filename} after {max_retries} retries.")
             except Exception as e:
-                print(f"Failed to move the files: {e}")
+                print(f"[OBS ERROR] Failed to move the files: {e}")
 
         def prepend_gloss_name_last_recordings(self, gloss_name=None, max_retries=6, delay=0.5):
             """Prepend the gloss name to the last recorded files."""
@@ -217,7 +235,7 @@ class OBSController:
             import time
 
             if not self.last_used_folder:
-                print("No folder set for the recording. Can't prepend the gloss name.")
+                print("[OBS ERROR] No folder set for the recording. Can't prepend the gloss name.")
                 return
 
             if not gloss_name:
@@ -232,13 +250,13 @@ class OBSController:
                         while retries < max_retries:
                             try:
                                 os.rename(file_path, os.path.join(self.last_used_folder, new_filename))
-                                print(f"Renamed {filename} to {new_filename}")
+                                print(f"[OBS] Renamed {filename} to {new_filename}")
                                 break
                             except PermissionError as e:
-                                print(f"Error renaming {filename}: {e}. Retrying in {delay} seconds...")
+                                print(f"[OBS ERROR] Error renaming {filename}: {e}. Retrying in {delay} seconds...")
                                 retries += 1
                                 time.sleep(delay)
                                 if retries == max_retries:
-                                    print(f"Failed to rename {filename} after {max_retries} retries.")
+                                    print(f"[OBS ERROR] Failed to rename {filename} after {max_retries} retries.")
             except Exception as e:
-                print(f"Failed to rename the files: {e}")
+                print(f"[OBS ERROR] Failed to rename the files: {e}")
