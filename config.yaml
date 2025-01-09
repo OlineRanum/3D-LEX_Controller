@@ -57,3 +57,7 @@ camera_save_path_1: 'D:\VideoCapture\Canon1'
 # camera_mic_name_4: 'Digital Audio Interface (UT-AUD 00K0626579)'
 # camera_save_path_4: 'D:\VideoCapture'
 
+obs_host: 'localhost'
+obs_port: 4457
+obs_buffer_folder: 'D:\VideoCapture\SourceRecordBuffer'
+obs_save_folder: 'D:\VideoCapture\testingOBSRecordScript'

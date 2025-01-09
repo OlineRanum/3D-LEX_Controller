@@ -11,6 +11,7 @@ class SetUp:
         self.__load_host_info()
         self.__load_paths()
         self.__load_optical_camera_configs()
+        self.__load_obs_config()
 
     def __load_vicon(self):
         self.vicon_sdk_path = self.args['vicon_sdk_path']
@@ -57,6 +58,12 @@ class SetUp:
             self.camera_save_paths.append(self.args['camera_save_path_' + str(cur_camera)])
             cur_camera += 1
 
+    def __load_obs_config(self):
+        self.obs_host = self.args['obs_host']
+        self.obs_port = self.args['obs_port']
+        self.obs_password = self.args.get('obs_password', None)
+        self.obs_buffer_folder = self.args['obs_buffer_folder']
+        self.obs_save_folder = self.args['obs_save_folder']
 
 if __name__ == "__main__":
     reader = SetUp("config.yaml")
