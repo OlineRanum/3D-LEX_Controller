@@ -9,7 +9,8 @@ keys:
 # Path to the folder where the data is saved
 output_dir: output
 
-
+# Leffe Listen connection
+leffe_con: "wss://leffe.science.uva.nl:8043/unrealServer/"
 
 # Shogun
 shogun_hostname:  'localhost'

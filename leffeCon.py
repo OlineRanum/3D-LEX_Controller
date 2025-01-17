@@ -4,8 +4,11 @@ import ssl
 import json
 import asyncio
 
+from src.config.setup import SetUp
+args = SetUp("config.yaml")
+
 async def send_message(msg):
-    uri = "ws://192.168.0.180:8009"
+    uri = f"ws://{args.websock_ip}:{args.websock_port}"
     async with websockets.connect(uri) as websocket:
         await websocket.send(msg)
 
@@ -44,7 +47,7 @@ async def handle_message(set_value, handler_value):
         print("Invalid message")
 
 async def receive_messages():
-    uri = "wss://leffe.science.uva.nl:8043/unrealServer/"
+    uri = args.leffe_con
     ssl_context = ssl.SSLContext()
     ssl_context.check_hostname = False
     ssl_context.verify_mode = ssl.CERT_NONE
