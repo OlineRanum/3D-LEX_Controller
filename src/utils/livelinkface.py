@@ -134,7 +134,7 @@ class LiveLinkFaceClient:
         """
         self.toIphone.send_message("/BatteryQuery", [])
 
-    def save_file(self, timecode, blendshapeCSV, referenceMOV, *args):
+    def save_file(self, command, timecode, blendshapeCSV, referenceMOV, *args):
         """
         Save a file on the iPhone server.
 
@@ -146,10 +146,11 @@ class LiveLinkFaceClient:
         Description:
         This method sends a transport message to the iPhone server to save a file.
         """
-        print("send the transport towards - " + self.args.target_ip + ':' + str(self.args.target_port + 2))
-        self.toIphone.send_message("/Transport", [self.args.target_ip + ':' + str(self.args.target_port + 2), referenceMOV])
+        print(f"send the transport towards:\tCSV{self.args.target_ip}:{str(self.args.receive_csv_port)}\tMOV{self.args.target_ip}:{str(self.args.receive_video_port)}")
+        self.toIphone.send_message("/Transport", [self.args.target_ip + ':' + str(self.args.receive_csv_port), blendshapeCSV])
+        self.toIphone.send_message("/Transport", [self.args.target_ip + ':' + str(self.args.receive_video_port), referenceMOV])
 
-class LiveLinkFaceServer:
+class LiveLinkFaceServer: 
     """
     Class LiveLinkFaceServer launches the live link server that communicates with the iPhone.
 
@@ -227,7 +228,7 @@ class LiveLinkFaceServer:
         self.client.start_capture()
         self.send_signal_recording_tcp()
 
-    def send_basic_cmd_tcp(self, cmd, extra="", *args):
+    def send_basic_cmd_tcp(self, cmd, extra="", port=None, *args):
         """
         Send a basic command to the TCP socket.
 
@@ -238,11 +239,14 @@ class LiveLinkFaceServer:
         Description:
         This method sends a basic message containing a command to the TCP socket.
         """
+        if port is None:
+            port = self.args.receive_csv_port
+
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as client_socket:
-            client_socket.connect((self.args.target_ip, self.args.target_port + 2))
+            client_socket.connect((self.args.target_ip, port))
 
             # Send the recording message
-            close_message = cmd + "!" + extra
+            close_message = "COMMAND:" + cmd + "!" + extra
             client_socket.sendall(struct.pack('>I', len(close_message)))
             client_socket.sendall(close_message.encode())
 
@@ -253,7 +257,8 @@ class LiveLinkFaceServer:
         Description:
         This method asks the TCP socket to close itself.
         """
-        self.send_basic_cmd_tcp('CLOSE')
+        self.send_basic_cmd_tcp('CLOSE', port=self.args.receive_csv_port)
+        self.send_basic_cmd_tcp('CLOSE', port=self.args.receive_video_port)
 
     def send_file_name_tcp(self, addr, file_name, *args):
         """
@@ -267,6 +272,7 @@ class LiveLinkFaceServer:
         This method sends the TCP socket a file name.
         """
         self.send_basic_cmd_tcp('FILE', file_name)
+        self.send_basic_cmd_tcp('FILE', file_name, port=self.args.receive_video_port)
 
     def send_are_you_okay_tcp(self, *args):
         """
@@ -276,6 +282,7 @@ class LiveLinkFaceServer:
         This method asks the TCP socket if it is okay.
         """
         self.send_basic_cmd_tcp('ALIVE')
+        self.send_basic_cmd_tcp('ALIVE', port=self.args.receive_video_port)
 
     def send_signal_recording_tcp(self, *args):
         """
@@ -285,6 +292,7 @@ class LiveLinkFaceServer:
         This method sets the TCP socket to the "file receiving" mode.
         """
         self.send_basic_cmd_tcp('RECORD')
+        self.send_basic_cmd_tcp('RECORD', port=self.args.receive_video_port)
 
     def ping_back(self, *args):
         """

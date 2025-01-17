@@ -16,6 +16,9 @@ class SetUp:
     def __load_vicon(self):
         self.vicon_sdk_path = self.args['vicon_sdk_path']
         sys.path.append(self.vicon_sdk_path)
+        self.vicon_package_paths = self.args['vicon_package_paths']
+        for path in self.vicon_package_paths:
+            sys.path.append(path)
 
     def __load_hotkeys(self):
         self.hotkeys = self.args.get('keys', {}) 
@@ -33,6 +36,8 @@ class SetUp:
         # Local computer 
         self.target_ip = self.args['target_ip']
         self.target_port = self.args['target_port']
+        self.receive_csv_port = self.args['receive_csv_port']
+        self.receive_video_port = self.args['receive_video_port']
 
         self.tcp_iphone_port = self.args['tcp_iphone_port']
         self.controller_port = self.args['controller_port']
@@ -44,6 +49,8 @@ class SetUp:
 
     def __load_paths(self):
         self.output_dir = self.args['output_dir']
+        self.llf_csv_save_path = self.args['llf_save_path_csv']
+        self.llf_video_save_path = self.args['llf_save_path_video']
 
     def __load_optical_camera_configs(self):
         self.camera_names = []

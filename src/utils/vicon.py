@@ -1,6 +1,6 @@
 import sys
-sys.path.append(r"C:\Program Files\Vicon\ShogunLive1.13\SDK\Python\shogun_live_api")
-sys.path.append(r"C:\Program Files\Vicon\ShogunLive1.13\SDK\Python\vicon_core_api")
+# sys.path.append(r"C:\Program Files\Vicon\ShogunLive1.14\SDK\Python\shogun_live_api")
+# sys.path.append(r"C:\Program Files\Vicon\ShogunLive1.14\SDK\Python\vicon_core_api")
 
 # Import the shogun_live_api package
 import shogun_live_api

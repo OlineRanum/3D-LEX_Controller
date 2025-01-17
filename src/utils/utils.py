@@ -8,9 +8,9 @@ import time
 import traceback
 
 import sys
-sys.path.append(r"C:\Program Files\Vicon\ShogunLive1.13\SDK\Python\vicon_core_api")
+# sys.path.append(r"C:\Program Files\Vicon\ShogunLive1.14\SDK\Python\vicon_core_api")
 
-from vicon_core_api import Client, Result, RPCError
+# from vicon_core_api import Client, Result, RPCError
 
 
 class SampleArgumentParser(argparse.ArgumentParser):
@@ -270,8 +270,10 @@ def print_api_call(api_return):
     return api_return[1]
 
 
-def check_connected(client):
+def check_connected(client, vicon_core_api=None):
     """Check the client is connected to an instance of the application. Raise an error if it isn't."""
+    from vicon_core_api import Client, Result, RPCError
+
     if not client.connected:
         raise RuntimeError("Failed to connect to application at {}:{}".format(client.server_endpoint[0], client.server_endpoint[1]))
     else:
