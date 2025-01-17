@@ -30,9 +30,13 @@ class SetUp:
         # print(f"Start key: {self.start_key}, Stop key: {self.stop_key}, Save key: {self.save_key}, Battery key: {self.battery_key}, Quit key: {self.quit_key}")
 
     def __load_host_info(self):
+        # Leffe Listen
+        self.leffe_con = self.args['leffe_con']
+
         # Live Link Face
         self.llf_udp_ip = self.args['llf_udp_ip']
         self.llf_udp_port = self.args['llf_udp_port']
+
         # Local computer 
         self.target_ip = self.args['target_ip']
         self.target_port = self.args['target_port']
