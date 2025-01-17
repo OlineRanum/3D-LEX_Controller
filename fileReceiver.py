@@ -22,7 +22,30 @@ import socket
 import struct
 import os
 import asyncio
+import queue
+import threading
 from src.config.setup import SetUp
+
+def handle_queue(write_queue, write_path, mode="csv"):
+    """
+    Worker function to handle writing files from the queue to disk.
+    """
+    while True:
+        # Get a file task from the queue
+        file_name, data = write_queue.get()
+        if file_name is None:  # Sentinel to terminate the worker
+            break
+
+        # Write the file to disk
+        file_path = os.path.join(write_path, f"{file_name}.{mode}")
+        print(f"[{mode}] Writing to file: {file_path}")
+        try:
+            with open(file_path, 'wb') as f:
+                f.write(data)
+        except Exception as e:
+            print(f"[{mode}] Error writing file: {e}")
+        finally:
+            write_queue.task_done()
 
 def receive_file(server_ip, server_port, write_path, mode="csv"):
     """
@@ -44,19 +67,23 @@ def receive_file(server_ip, server_port, write_path, mode="csv"):
     Returns:
     None
     """
+    # Create a queue for file writing tasks
+    write_queue = queue.Queue()
 
-    # Create a TCP socket, and accept only 1 connection simultaniously
+    # Start the worker thread for writing files
+    worker_thread = threading.Thread(target=handle_queue, args=(write_queue, write_path, mode), daemon=True)
+    worker_thread.start()
+
+    # Create a TCP socket, and accept only 1 connection at a time
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server_socket.bind((server_ip, server_port))
     server_socket.listen(1)
 
-    file_name = "NoFileNameGiven"
-    os.makedirs("output", exist_ok=True)
-
     print(f"[{mode}] Server listening on {server_ip}:{server_port}")
     print(f"[{mode}] Writing files to: {write_path}")
 
-    # Serve until we are commanded to quit
+    file_name = "NoFileNameGiven"
+
     while True:
         # Accept a connection from a client
         client_socket, client_address = server_socket.accept()
@@ -76,9 +103,8 @@ def receive_file(server_ip, server_port, write_path, mode="csv"):
                     break
                 data += packet
 
-
             if data.startswith(b"COMMAND:"):
-            # if '!' in data:
+                # Handle command messages
                 data = data.decode("utf-8").lstrip("COMMAND:")
                 cmd, msg = data.split('!', 1)
                 if cmd == 'CLOSE':
@@ -92,26 +118,25 @@ def receive_file(server_ip, server_port, write_path, mode="csv"):
                 else:
                     print(f"[{mode}] Unknown command: {cmd}")
             else:
-                file_path = os.path.join(write_path, f"{file_name}.{mode}")
-                print(f"[{mode}] Writing to file: {file_path}")
-                with open(file_path, 'wb') as f:
-                    f.write(data)
+                # Enqueue the file data for writing
+                print(f"[{mode}] Enqueuing file {file_name}.{mode}")
+                write_queue.put((file_name, data))
                 file_name += "_rerecorded"
 
         except Exception as e:
             print(f"[{mode}] Error:", e)
         finally:
-            # Close the client socket
             client_socket.close()
 
-    # Close the server socket
+    # Signal the worker thread to stop and close the queue
+    write_queue.put((None, None))
+    worker_thread.join()
     server_socket.close()
+
 
 if __name__ == "__main__":
     args = SetUp("config.yaml")
 
-    # Make sure the IP and Port are the same in the TCP connection part of the OSC server
-    # write_path = r"C:\Users\Public\Documents\Vicon\ShogunLive1.x\Captures\livelinkface"
     csv_path = args.llf_csv_save_path
     video_path = args.llf_video_save_path
     print("Starting file receiver...")
