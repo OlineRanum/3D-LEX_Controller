@@ -26,6 +26,16 @@ class PopUp:
         
         root.destroy()  # Destroy the root window after the popup
 
+    def show_popup_yesno(self, title, message):
+        """Display a popup with 'Yes' and 'No' options."""
+        root = tk.Tk()
+        root.withdraw()
+
+        response = messagebox.askyesno(title, message)
+
+        root.destroy()
+        return response
+
     def reset_suppression(self):
         """Reset the suppression flag, allowing popups to show again."""
         self.suppress_warning = False

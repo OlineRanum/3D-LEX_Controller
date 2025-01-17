@@ -1,5 +1,5 @@
 import sys
-sys.path.append(r"C:\Program Files\Vicon\ShogunPost1.12\SDK\Win64")
+# sys.path.append(r"C:\Program Files\Vicon\ShogunPost1.14\SDK\Win64")
 
 try:
     import ViconShogunPostSDK

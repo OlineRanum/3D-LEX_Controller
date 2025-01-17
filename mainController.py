@@ -31,6 +31,7 @@ import websockets
 from src.config.setup import SetUp
 from src.utils.controlAPI import Control
 from src.utils.opticalCamera import FFmpegRecorder
+import src.utils.obsRecording as obsRecording
 from src.utils.popUp import PopUp
 import functools
 import os
@@ -62,7 +63,7 @@ async def handle_close(websocket, control, message):
     await websocket.send("BYE")
 
 
-async def handle_start(websocket, control, optical_camera, message):
+async def handle_start(websocket, control, optical_cameras, obs, message):
     """
     Handle the "recordStart" command.
 
@@ -79,37 +80,45 @@ async def handle_start(websocket, control, optical_camera, message):
 
     print("[main] Asking optical camera to START record...")
     try:
-        optical_camera.start_record()
+        for optical_camera in optical_cameras:
+            optical_camera.start_record()
     except Exception as e:
         print(f"[main] Error starting optical camera: {e}")
+
+    try:
+        obs.start_recording()
+    except Exception as e:
+        print(f"[main] Error starting OBS recording: {e}")
 
     await websocket.send("recording")
 
 
-async def handle_stop(websocket, control, optical_camera, message):
+async def handle_stop(websocket, control, optical_cameras, obs, message):
     """
     Handle the "recordStop" command.
 
     Description:
     This function handles the "recordStop" command received from the client.
-    It instructs the OSC and Shogun servers to stop recording and sends a
-    "stopping" message back to the client.
+    It instructs the OSC, Shogun servers, and all optical cameras to stop recording,
+    and sends a "stopping" message back to the client.
 
     Returns:
     None
     """
-    print("[main] Asking OSC, Shogun and camera to STOP record...")
+    print("[main] Asking OSC, Shogun, and cameras to STOP record...")
 
     try:
-        # Run both stop operations concurrently and wait for them to finish
-        await asyncio.gather(
-            optical_camera.stop_record(),  # Stop the optical camera recording
-            control.stop_record_osc_shogun(),  # Stop the OSC and Shogun recording
-        )
+        # Create tasks for stopping all cameras and stopping OSC/Shogun
+        tasks = [
+            asyncio.to_thread(camera.stop_record) for camera in optical_cameras
+        ] + [asyncio.to_thread(control.stop_record_osc_shogun)] + [asyncio.to_thread(obs.stop_recording)]
+
+        # Run all tasks concurrently and wait for them to finish
+        await asyncio.gather(*tasks)
     except Exception as e:
         print(f"[main ERROR] stopping recordings: {e}")
 
-    # Send the "stopping" message to the client after both tasks are done
+    # Send the "stopping" message to the client after all tasks are done
     try:
         await websocket.send("stopping")
     except websockets.exceptions.ConnectionClosedOK:
@@ -135,7 +144,7 @@ async def handle_ping(websocket, control, message):
     await websocket.send("pong")
 
 
-async def handle_filename(websocket, control, optical_camera, message):
+async def handle_filename(websocket, control, optical_cameras, obs, message):
     """
     Handle the "fileName" command.
 
@@ -153,9 +162,15 @@ async def handle_filename(websocket, control, optical_camera, message):
 
     print("[main] Asking optical camera to set the file name...")
     try:
-        optical_camera.set_recording_name(file_name)
+        for optical_camera in optical_cameras:
+            optical_camera.set_recording_name(file_name + "_" + optical_camera.video_device)
     except Exception as e:
         print(f"[main] Error setting optical camera file name: {e}")
+
+    try:
+        obs.set_save_location(None, gloss_name=file_name)
+    except Exception as e:
+        print(f"[main] Error setting OBS file name: {e}")
 
     await websocket.send("filename_set")
 
@@ -169,7 +184,7 @@ async def handle_default(message):
 
 
 # Define a function to handle incoming messages from clients
-async def message_handler(control, optical_camera, websocket, path):
+async def message_handler(control, optical_cameras, obs, websocket, path):
     """
     Handle incoming messages from clients.
 
@@ -187,10 +202,10 @@ async def message_handler(control, optical_camera, websocket, path):
     """
     message_handlers = {
         "close": functools.partial(handle_close, websocket, control),
-        "recordStart": functools.partial(handle_start, websocket, control, optical_camera),
-        "recordStop": functools.partial(handle_stop, websocket, control, optical_camera),
+        "recordStart": functools.partial(handle_start, websocket, control, optical_cameras, obs),
+        "recordStop": functools.partial(handle_stop, websocket, control, optical_cameras, obs),
         "ping": functools.partial(handle_ping, websocket, control),
-        "fileName": functools.partial(handle_filename, websocket, control, optical_camera),
+        "fileName": functools.partial(handle_filename, websocket, control, optical_cameras, obs),
         "greet": handle_greet,
     }
 
@@ -200,7 +215,7 @@ async def message_handler(control, optical_camera, websocket, path):
         handler = message_handlers.get(message_type, handle_default)
         await handler(message)
 
-async def start_server(control, optical_camera, args):
+async def start_server(control, optical_cameras, obs=None, args=None):
     """
     Start the WebSocket server.
 
@@ -216,7 +231,7 @@ async def start_server(control, optical_camera, args):
     Returns:
     None
     """
-    handler = functools.partial(message_handler, control, optical_camera)
+    handler = functools.partial(message_handler, control, optical_cameras, obs)
     async with websockets.serve(handler, args.websock_ip, args.websock_port):
         print("[main] Websocket Server started!")
         # Wait until the stop event is set
@@ -248,11 +263,25 @@ if __name__ == "__main__":
     control = Control(args)
 
     popUp = PopUp()
-    # Start the optical camera
-    optical_camera = FFmpegRecorder(video_device=args.camera_name, audio_device=args.camera_mic_name, save_path=args.camera_save_path, popUp=popUp)
-    optical_camera.set_save_location(args.camera_save_path)
-    optical_camera.set_save_location('D:\\VideoCapture')  # Set your desired save location
-    optical_camera.validate_devices()
+
+    obs = obsRecording.OBSController(args.obs_host, args.obs_port, args.obs_password, popUp=PopUp())
+    
+    if obs.statusCode == obsRecording.OBSStatus.NOT_CONNECTED or obs.statusCode == obsRecording.OBSStatus.ERROR:
+        print("OBS not connected or turned off. Please check the connection and try again if you want OBS recordings.")
+    else:
+        obs.set_save_location(args.obs_save_folder, gloss_name="testb")
+        obs.set_buffer_folder(args.obs_buffer_folder)
+
+    optical_cameras = []
+    for i in range(len(args.camera_names)):
+        print(f"Camera {i + 1}: {args.camera_names[i]}, {args.camera_mic_names[i]}, {args.camera_save_paths[i]}")
+        # Start the optical camera
+        optical_camera = FFmpegRecorder(video_device=args.camera_names[i], audio_device=args.camera_mic_names[i], save_path=args.camera_save_paths[i], popUp=popUp)
+        optical_camera.set_save_location(args.camera_save_paths[i])
+        # optical_camera.set_save_location('D:\\VideoCapture')  # Set your desired save location
+        if optical_camera.validate_devices() == (True, True) or optical_camera.validate_devices() == (True, False):
+            optical_cameras.append(optical_camera)
+
 
     # Accept calls, and let the websockt control the controller
     # asyncio.run(start_server(control, args))
@@ -262,7 +291,7 @@ if __name__ == "__main__":
     loop = asyncio.get_event_loop()
     try:
         # Start the server within the existing event loop
-        loop.run_until_complete(start_server(control, optical_camera, args))
+        loop.run_until_complete(start_server(control, optical_cameras, obs, args))
         loop.run_forever()
     finally:
         # Clean up the event loop

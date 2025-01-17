@@ -5,7 +5,7 @@ import platform
 import re
 import time
 import asyncio
-import threading
+from threading import Thread
 
 class FFmpegRecorder:
     def __init__(self, save_path="./", file_name="recording", video_device="video=UT-VID 00K0626579", audio_device="audio=Digital Audio Interface (UT-AUD 00K0626579)", popUp=None):
@@ -51,7 +51,7 @@ class FFmpegRecorder:
         file_size_mb = os.path.getsize(self.current_output_file) / (1024 * 1024)
 
         # Expected file size (in MB) based on duration (adjust 2.0 for your average file size per second)
-        avg_size_per_sec = 0.606  # Based on a 1080p 60 FPS video with 5000 kbps bitrate that we have recorded over 22 seconds
+        avg_size_per_sec = 0.470  # Based on a 1080p 60 FPS video with 5000 kbps bitrate that we have recorded over 22 seconds
         expected_size_mb = duration * avg_size_per_sec
 
         # Set a tolerance threshold (e.g., 20% smaller than expected)
@@ -139,18 +139,20 @@ class FFmpegRecorder:
         audio_devices = devices['audio']
         video_devices = devices['video']
 
+        audio_able = True
+
         # Validate audio device
         if given_audio_device not in audio_devices:
             print(f"[ffmpeg ERROR] Audio device '{given_audio_device}' not found. Available devices: {audio_devices}")
-            return False
+            audio_able = False
 
         # Validate video device
         if given_video_device not in video_devices:
             print(f"[ffmpeg ERROR] Video device '{given_video_device}' not found. Available devices: {video_devices}")
-            return False
+            return (False, audio_able)
         
         print(f"[ffmpeg] Both {given_video_device} and {given_audio_device} are valid.")
-        return True
+        return (True, True)
 
     def start_record(self):
         """Start the FFmpeg recording using the given devices."""
@@ -163,19 +165,35 @@ class FFmpegRecorder:
         output_file = os.path.join(self.save_path, self.get_unique_filename())
         
         # Construct the FFmpeg command
+        # command = [
+        #     'ffmpeg',
+        #     '-f', 'dshow',
+        #     '-i', f'video={self.video_device}:audio={self.audio_device}',  # Input devices
+        #     '-vf', 'format=yuv420p',  # Set pixel format
+        #     '-s', '1920x1080',        # Set resolution to 1080p
+        #     '-r', '60',               # Set frame rate to 60 FPS
+        #     '-preset', 'fast',        # Encoding preset
+        #     '-y',                     # Overwrite output file if it exists
+        #     '-crf', '23',             # Use CRF to control quality
+        #     '-max_muxing_queue_size', '1024',  # Prevent queue overflow for longer streams
+        #     '-shortest',              # Maintain stream synchronization
+        #     output_file               # Output file path
+        # ]
+        # Construct the FFmpeg command without audio
         command = [
             'ffmpeg',
             '-f', 'dshow',
-            '-i', f'video={self.video_device}:audio={self.audio_device}',  # Input devices
+            '-i', f'video={self.video_device}',  # Input video device only
             '-vf', 'format=yuv420p',  # Set pixel format
             '-s', '1920x1080',        # Set resolution to 1080p
             '-r', '60',               # Set frame rate to 60 FPS
-            '-preset', 'ultrafast',   # Encoding preset
+            '-preset', 'fast',        # Encoding preset
             '-y',                     # Overwrite output file if it exists
-            '-b:v', '3000k',          # Lower video bitrate
-            '-shortest',              # Stop recording when the shortest stream ends (video/audio)
+            '-crf', '23',             # Use CRF to control quality
+            '-max_muxing_queue_size', '1024',  # Prevent queue overflow for longer streams
             output_file               # Output file path
         ]
+
 
         # Start the FFmpeg process and save the process handle
         print(f"[ffmpeg] Recording started: {output_file}")
@@ -184,7 +202,7 @@ class FFmpegRecorder:
         # self.ffmpeg_process = subprocess.Popen(command, stdin=subprocess.PIPE, creationflags=subprocess.CREATE_NEW_PROCESS_GROUP)
         self.ffmpeg_process = subprocess.Popen(command, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         
-    async def stop_record(self):
+    def stop_record(self):
         """Stop the FFmpeg recording."""
         if not self.recording:
             print("[ffmpeg] No recording in progress.")
@@ -193,21 +211,25 @@ class FFmpegRecorder:
         print("[ffmpeg] Stopping the optical camera...")
         # await asyncio.sleep(0.5) # Wait for half a second before stopping the recording, making sure we have the last frames
 
-        # Offload the FFmpeg stop to a separate thread so it doesn't block the event loop
-        await asyncio.to_thread(self.stop_ffmpeg())
+        # Start stopping FFmpeg in a separate thread
+        thread = Thread(target=self.stop_ffmpeg, args=(self.ffmpeg_process,))
+        thread.start()
 
-    def stop_ffmpeg(self):
+        self.ffmpeg_process = None
+        return True
+
+    def stop_ffmpeg(self, ffmpeg_process):
         """This function will run in a separate thread to stop FFmpeg."""
         try:
             # Perform the blocking FFmpeg operations
-            self.ffmpeg_process.communicate(str.encode("q"))  # Send a 'q' to stop
-            self.ffmpeg_process.wait()  # Wait for FFmpeg to finish
+            ffmpeg_process.communicate(str.encode("q"))  # Send a 'q' to stop
+            ffmpeg_process.wait()  # Wait for FFmpeg to finish
             # self.ffmpeg_process.terminate()  # Terminate the FFmpeg process
         except Exception as e:
             print(f"[ffmpeg] Error while stopping FFmpeg: {e}")
         finally:
-            self.ffmpeg_process = None
-            self.check_last_file()
+            ffmpeg_process = None
+            # self.check_last_file()
             # After stopping FFmpeg, do the final cleanup
             print("[ffmpeg] Recording and processing stopped.")
             self.recording = False
@@ -257,3 +279,49 @@ class FFmpegRecorder:
 #     recorder.start_record()
 #     time.sleep(5)  # Simulate 5 seconds of recording
 #     recorder.stop_record()
+
+# new usage example with config:
+# camera_name_2: '@device_pnp_\\?\usb#vid_1f6a&pid_15ae&mi_00#6&a1a60da&0&0000#{65e8773d-8f56-11d0-a3b9-00a0c9223196}\global'
+# camera_mic_name_2: '@device_cm_{33D9A762-90C8-11D0-BD43-00A0C911CE86}\wave_{97FF0363-9EA5-4292-9BA2-918B2CBAD469}'
+# camera_save_path_2: 'D:\VideoCapture\KiyoPro1'
+if __name__ == "__main__":
+    # Configuration for the devices and save path
+    camera_name_2 = r'@device_pnp_\\?\usb#vid_1f6a&pid_15ae&mi_00#6&a1a60da&0&0000#{65e8773d-8f56-11d0-a3b9-00a0c9223196}\\global'
+    camera_mic_name_2 = r'@device_cm_{33D9A762-90C8-11D0-BD43-00A0C911CE86}\\wave_{97FF0363-9EA5-4292-9BA2-918B2CBAD469}'
+    camera_save_path_2 = 'D:\\VideoCapture\\KiyoPro1'
+
+    # Initialize the recorder with the provided configuration
+    recorder = FFmpegRecorder(
+        save_path=camera_save_path_2,
+        file_name="KiyoPro1_Record",
+        video_device=camera_name_2,
+        audio_device=camera_mic_name_2
+    )
+
+    # Set the save location
+    try:
+        recorder.set_save_location(camera_save_path_2)
+    except ValueError as e:
+        print(f"[ffmpeg ERROR] {e}")
+        exit(1)
+
+    # # List available devices (optional, useful for debugging)
+    # devices = recorder.list_devices()
+    # print(f"Available Audio Devices: {devices['audio']}")
+    # print(f"Available Video Devices: {devices['video']}")
+
+    # # Validate the devices
+    # if not recorder.validate_devices():
+    #     print("[ffmpeg ERROR] Validation failed for the provided devices.")
+    #     exit(1)
+
+    # Start recording
+    recorder.start_record()
+
+    # Simulate recording for 3 seconds
+    time.sleep(3)
+
+    # Stop recording
+    recorder.stop_record()
+
+    print("[INFO] Recording session complete.")

@@ -21,8 +21,10 @@ tasklist | FIND "python"
 import socket
 import struct
 import os
+import asyncio
+from src.config.setup import SetUp
 
-def receive_file(server_ip, server_port, write_path):
+def receive_file(server_ip, server_port, write_path, mode="csv"):
     """
     Receive file on a given IP and port.
 
@@ -51,19 +53,20 @@ def receive_file(server_ip, server_port, write_path):
     file_name = "NoFileNameGiven"
     os.makedirs("output", exist_ok=True)
 
-    print(f"Server listening on {server_ip}:{server_port}")
+    print(f"[{mode}] Server listening on {server_ip}:{server_port}")
+    print(f"[{mode}] Writing files to: {write_path}")
 
     # Serve until we are commanded to quit
     while True:
         # Accept a connection from a client
         client_socket, client_address = server_socket.accept()
-        print(f"Connection established from {client_address}")
+        print(f"[{mode}] Connection established from {client_address}")
 
         try:
             # Receive the int32 representing the total size of the file
             size_data = client_socket.recv(4)
             total_size = struct.unpack('>I', size_data)[0]
-            print("Size of msg:", total_size)
+            print(f"[{mode}] Size of msg:", total_size)
 
             # Receive the full data
             data = b""
@@ -73,33 +76,30 @@ def receive_file(server_ip, server_port, write_path):
                     break
                 data += packet
 
-            data = data.decode()
 
-            if '!' in data:
+            if data.startswith(b"COMMAND:"):
+            # if '!' in data:
+                data = data.decode("utf-8").lstrip("COMMAND:")
                 cmd, msg = data.split('!', 1)
                 if cmd == 'CLOSE':
                     break
                 elif cmd == 'ALIVE':
-                    print("We are alive")
+                    print(f"[{mode}] We are alive")
                 elif cmd == 'FILE':
                     file_name = msg
                 elif cmd == 'RECORD':
-                    print("We are recording")
+                    print(f"[{mode}] We are recording")
                 else:
-                    file_path = os.path.join(write_path, f"{file_name}.csv")
-                    print(f"Writing to file: {file_path}")
-                    with open(file_path, 'wb') as f:
-                        f.write(data.encode())
-                    file_name += "_rerecorded"
+                    print(f"[{mode}] Unknown command: {cmd}")
             else:
-                file_path = os.path.join(write_path, f"{file_name}.csv")
-                print(f"Writing to file: {file_path}")
+                file_path = os.path.join(write_path, f"{file_name}.{mode}")
+                print(f"[{mode}] Writing to file: {file_path}")
                 with open(file_path, 'wb') as f:
-                    f.write(data.encode())
+                    f.write(data)
                 file_name += "_rerecorded"
 
         except Exception as e:
-            print("Error:", e)
+            print(f"[{mode}] Error:", e)
         finally:
             # Close the client socket
             client_socket.close()
@@ -108,10 +108,16 @@ def receive_file(server_ip, server_port, write_path):
     server_socket.close()
 
 if __name__ == "__main__":
+    args = SetUp("config.yaml")
+
     # Make sure the IP and Port are the same in the TCP connection part of the OSC server
-    ip_serve = "192.168.0.180"
-    port_serve = 8007 # port is currently the OSC server port + 2
-    write_path = r"C:\Users\Public\Documents\Vicon\ShogunLive1.x\Captures\livelinkface"
+    # write_path = r"C:\Users\Public\Documents\Vicon\ShogunLive1.x\Captures\livelinkface"
+    csv_path = args.llf_csv_save_path
+    video_path = args.llf_video_save_path
     print("Starting file receiver...")
-    print("Writing files to: ", write_path)
-    receive_file(ip_serve, port_serve, write_path)
+    loop = asyncio.get_event_loop()
+    tasks = [
+        loop.run_in_executor(None, receive_file, args.target_ip, args.receive_csv_port, csv_path),
+        loop.run_in_executor(None, receive_file, args.target_ip, args.receive_video_port, video_path, "mov")
+    ]
+    loop.run_until_complete(asyncio.wait(tasks))

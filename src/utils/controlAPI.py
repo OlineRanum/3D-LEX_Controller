@@ -30,24 +30,24 @@ import sys
 import os
 import time
 # get the path to the Shogun SDK
-sys.path.append(r"C:\Program Files\Vicon\ShogunLive1.13\SDK\Python\shogun_live_api")
-sys.path.append(r"C:\Program Files\Vicon\ShogunLive1.13\SDK\Python\vicon_core_api")
+# sys.path.append(r"C:\Program Files\Vicon\ShogunLive1.14\SDK\Python\shogun_live_api")
+# sys.path.append(r"C:\Program Files\Vicon\ShogunLive1.14\SDK\Python\vicon_core_api")
 
 # Import the shogun_live_api package
-import shogun_live_api
-import vicon_core_api
+# import shogun_live_api
+# import vicon_core_api
 
 # get the cur path to current folder for importing shogunPostFuncs
 cur_path = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(cur_path)
 
-try:
-    import shogunPostFuncs as spf
-    from shogun_live_api.interfaces.capture_services import CaptureServices
-    from vicon_core_api.client import Client, RPCError
-except ImportError as e:
-    print(f"ImportError: {str(e)}")
-    sys.exit(1)
+# try:
+#     import shogunPostFuncs as spf
+#     from shogun_live_api.interfaces.capture_services import CaptureServices
+#     from vicon_core_api.client import Client, RPCError
+# except ImportError as e:
+#     print(f"ImportError: {str(e)}")
+#     sys.exit(1)
 
 class Control:
     def __init__(self, args):
@@ -73,6 +73,22 @@ class Control:
         - close_osc_iphone: Close connections and servers for OSC and iPhone.
         - servers_alive: Check if all servers are still alive.
         """
+        # Initialize Vicon SDK and Shogun Live API
+        sys.path.append(args.vicon_sdk_path)
+        for path in args.vicon_package_paths:
+            sys.path.append(path)
+
+        import shogun_live_api
+        import vicon_core_api
+
+        try:
+            import shogunPostFuncs as spf
+            from shogun_live_api.interfaces.capture_services import CaptureServices
+            from vicon_core_api.client import Client, RPCError
+        except ImportError as e:
+            print(f"ImportError: {str(e)}")
+            sys.exit(1)
+
         self.PC_IP = args.target_ip
         self.PORT_TCP_IPHONE = args.tcp_iphone_port
         self.SHOGUN_IP = args.shogun_hostname
@@ -81,11 +97,11 @@ class Control:
 
         # Connect Vicon Core API client to the application.
         self.vicon_client = Client(self.SHOGUN_IP, args.shogun_port)
-        utils.check_connected(self.vicon_client)
+        utils.check_connected(self.vicon_client, vicon_core_api)
         # Create required Shogun Live API services.
         self.vicon_capture_services = CaptureServices(self.vicon_client)
 
-        self.SHOGUN_POST = spf.ViconShogunPost()
+        # self.SHOGUN_POST = spf.ViconShogunPost()
         self.last_path = self.get_capture_folder_shogun()
 
         print("Control API for Vicon Shogun Live initialized.")
@@ -97,7 +113,7 @@ class Control:
         self.OSC_client.send_message("/RecordStart", [])
         self.vicon_capture_services.start_capture()
 
-    async def stop_record_osc_shogun(self):
+    def stop_record_osc_shogun(self):
         """
         Stop recording via OSC and Shogun.
         """
@@ -122,7 +138,7 @@ class Control:
         self.OSC_client.send_message("/RecordStop", [])
         result = self.vicon_capture_services.stop_capture(0)
         print(f"Recording stopped. Result: {result}")
-        self.open_last_file_shogun()
+        # self.open_last_file_shogun()
 
     def open_last_file_shogun(self):
         """
@@ -182,4 +198,4 @@ class Control:
         Check if all servers are still alive.
         """
         self.OSC_client.send_message("/Alive", [])
-        utils.check_connected(self.vicon_client)
+        utils.check_connected(self.vicon_client, vicon_core_api)
