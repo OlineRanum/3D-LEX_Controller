@@ -19,8 +19,9 @@ if __name__ == '__main__':
 
         # Simulate recording duration
         import time
-        print("Recording for 5 seconds...")
-        time.sleep(15)
+        recordingTime = 60*15 # 15 minutes
+        print(f"Recording for {recordingTime} seconds...")
+        time.sleep(recordingTime)
 
         # Stop recording
         obs.stop_recording()
