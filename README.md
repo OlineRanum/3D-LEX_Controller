@@ -1,28 +1,33 @@
 🍍🍍🍍🍍🍍🍍🍍🍍🍍🍍🍍🍍🍍🍍🍍🍍🍍🍍
-# The 3🍍-LEX Control System 
+# The Pineapple Pipeline
 🍍🍍🍍🍍🍍🍍🍍🍍🍍🍍🍍🍍🍍🍍🍍🍍🍍🍍
 
 
-The README for the 3🍍-LEX Control System repository is structured to provide practical guidance on managing data acquisition pipelines. It covers essential topics such as launching servers in a Windows environment, WebSocket communication, OSC server handles/functions, TCP socket communication, and includes helpful pipeline illustrations. Each section offers straightforward instructions and insights, making it easier for developers, researchers, and enthusiasts to understand and utilize the system effectively.
+The README for the Pineapple Piple repository is structured to provide practical guidance on managing data acquisition pipelines. It covers essential topics such as launching servers in a Windows environment, WebSocket communication, OSC server handles/functions, TCP socket communication, and includes helpful pipeline illustrations. Each section offers straightforward instructions and insights, making it easier for developers, researchers, and enthusiasts to understand and utilize the system effectively.
 
 ### Project Hardware
-- Vicon Vero Cameras: Utilized for motion capture purposes.
-- StretchSense Gloves: Employed for hand motion tracking.
-- iPhone: Used as a device for communication and potentially for additional data input.
+- Vicon System:
+   - Vero Cameras: Utilized for motion capture purposes.
+   - Flir Blackfly: Records video data.
+   - Lock: Synchronizes Vicon Camera recordings.
+- iPhone: Used as a device for communication, ARKit recordings of face animations and video.
+- Razer KiyoPro: Records video data (can be replaced with any other webcam).
 
 ### External Software
 In addition to our custom scripts, the project relies on the following software tools:
-- Shogun Live: Integrated for motion capture and potentially for controlling the Hand Engine.
-- Hand Engine: Directly controlled through Shogun Live, likely used for hand motion analysis.
+- Shogun Live: Integrated for motion capture.
+- Shogun Post: Integrated for playing back motion capture data.
 - Live Link Face: Utilized for facial motion capture and communication.
+- OBS: Utilized for recording video data.
 
 ### External Software Communication summary:
 - Shogun API: Used to communicate with Shogun Live, facilitating control and data exchange.
 - Live Link Face OSC Protocol: Employed to communicate with Live Link Face, enabling data transfer and synchronization.
-- Hand Engine Integration: Coordinated through Shogun Live, suggesting potential integration with the overall motion capture system.
-
+- OBS Websocket Server: Used to start and stop recordings within the OBS software.
+   - OBS Source Record Plugin: Used to add extra cameras in OBS software.
+ 
 ### Usage in Windows
-In windows, double click the job.bat script to launch all servers simultaneously. Communicate with the system by using the websocket.
+In windows, double click the job.bat script to launch all servers simultaneously. Communicate with the system by using the websocket. If Shogun Post is turned off, then it will be ignored (no playbacks of mocap data in the software).
 
 ---
 
@@ -74,7 +79,7 @@ In your `config.yaml`, set the following parameters:
 - `obs_save_folder`: Path to the folder where final recordings will be saved.
 
 
-### Recording Workflow
+### Recording Workflow OBS
 
 #### Python Commands
 Once the setup is complete, you can control the recording via Python using the following commands:
@@ -94,6 +99,7 @@ obs.start_recording()
 
 # Stop Recording
 obs.stop_recording()
+
 ```
 
 ---
@@ -131,6 +137,10 @@ The socket operates in a single state, handling incoming messages based on their
 
 ### Default File Naming
 If a file name is not specified using the "FILE" command, the data will be saved with the default name "NoFileNameGiven". Subsequent recordings will append "_rerecorded" to the file name.
+
+### Retargeted Animation Replay
+- After recording, a replay of the retargeted animation is displayed on an avatar in Unreal Engine.
+- This is achieved through a Blueprint event (a link to the blueprint will be added later).
 
 # Pipeline Illustrations
 ![Pipeline](/img/PineapplePipelineLightVersion.png)
