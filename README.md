@@ -133,6 +133,5 @@ The socket operates in a single state, handling incoming messages based on their
 If a file name is not specified using the "FILE" command, the data will be saved with the default name "NoFileNameGiven". Subsequent recordings will append "_rerecorded" to the file name.
 
 # Pipeline Illustrations
-Needs to be updated (missing Shogun Post and OBS)
-![Pipeline](/img/PipelineSignbankProject2.png)
+![Pipeline](/img/PineapplePipelineLightVersion.png)
 
