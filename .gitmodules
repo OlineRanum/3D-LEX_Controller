@@ -1,0 +1,3 @@
+[submodule "src/utils/OBSRecorder"]
+	path = src/utils/OBSRecorder
+	url = https://github.com/J-Andersen-UvA/OBSRecorder
