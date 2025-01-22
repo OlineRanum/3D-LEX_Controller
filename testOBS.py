@@ -1,5 +1,5 @@
 from src.config.setup import SetUp
-import src.utils.obsRecording as obsRecording
+import src.utils.OBSRecorder.src.obsRecording as obsRecording
 import src.utils.popUp as popUp
 
 if __name__ == '__main__':
@@ -11,7 +11,7 @@ if __name__ == '__main__':
         exit()
 
     try:
-        obs.set_save_location(args.obs_save_folder, gloss_name="testb")
+        obs.set_save_location(args.obs_save_folder, vid_name="glossTEST1")
         obs.set_buffer_folder(args.obs_buffer_folder)
 
         # Start recording for each scene (one at a time for simplicity)
@@ -19,7 +19,8 @@ if __name__ == '__main__':
 
         # Simulate recording duration
         import time
-        recordingTime = 60*15 # 15 minutes
+        # recordingTime = 60*15 # 15 minutes
+        recordingTime = 10 # 5 seconds
         print(f"Recording for {recordingTime} seconds...")
         time.sleep(recordingTime)
 
