@@ -114,6 +114,7 @@ class LiveLinkFaceClient:
         This method sets the file name for capturing on the iPhone server.
         It also resets the capture number.
         """
+        gloss = ''.join(e for e in gloss if e.isalnum())
         print("Setting filename to: ", gloss)
         print("ARGS: ", args)
         self.toIphone.send_message("/Slate", [self.gloss])
