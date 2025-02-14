@@ -31,7 +31,7 @@ import websockets
 from src.config.setup import SetUp
 from src.utils.controlAPI import Control
 from src.utils.opticalCamera import FFmpegRecorder
-import src.utils.obsRecording as obsRecording
+import src.utils.OBSRecorder.src.obsRecording as obsRecording
 from src.utils.popUp import PopUp
 import functools
 import os
@@ -168,7 +168,7 @@ async def handle_filename(websocket, control, optical_cameras, obs, message):
         print(f"[main] Error setting optical camera file name: {e}")
 
     try:
-        obs.set_save_location(None, gloss_name=file_name)
+        obs.set_save_location(None, vid_name=file_name)
     except Exception as e:
         print(f"[main] Error setting OBS file name: {e}")
 
@@ -269,7 +269,7 @@ if __name__ == "__main__":
     if obs.statusCode == obsRecording.OBSStatus.NOT_CONNECTED or obs.statusCode == obsRecording.OBSStatus.ERROR:
         print("OBS not connected or turned off. Please check the connection and try again if you want OBS recordings.")
     else:
-        obs.set_save_location(args.obs_save_folder, gloss_name="testb")
+        obs.set_save_location(args.obs_save_folder, vid_name="testb")
         obs.set_buffer_folder(args.obs_buffer_folder)
 
     optical_cameras = []

@@ -24,8 +24,10 @@ shogun_port: 52800
 # llf_udp_ip: "192.168.0.246" # IP of vislabApple
 # llf_udp_ip: "192.168.0.204" # IP of vislabApple
 # llf_udp_ip: "192.168.0.120" # IP of vislabApple
-llf_udp_ip: "192.168.0.227" # IP of vislabApple
+# llf_udp_ip: "192.168.0.227" # IP of vislabApple
+llf_udp_ip: "192.168.0.111" # IP of vislabApple
 # llf_udp_ip: "192.168.0.173" # IP of SignLabApple
+# llf_udp_ip: "192.168.0.153" # IP of SignLabApple
 llf_udp_port: 8006 # Port to connect the Iphones to the computer
 llf_save_path_csv: 'D:\LiveLinkFace\LiveLinkFaceCSV'
 llf_save_path_video: 'D:\LiveLinkFace\LiveLinkFaceVideo'
@@ -70,4 +72,4 @@ vicon_package_paths:
 obs_host: 'localhost'
 obs_port: 4457
 obs_buffer_folder: 'D:\VideoCapture\SourceRecordBuffer'
-obs_save_folder: 'D:\VideoCapture\testingOBSRecordScript'
+obs_save_folder: 'D:\VideoCapture\pineappleRecordings'
