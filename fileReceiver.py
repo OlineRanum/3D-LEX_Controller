@@ -24,6 +24,7 @@ import os
 import asyncio
 import queue
 import threading
+import time
 from src.config.setup import SetUp
 
 def handle_queue(write_queue, write_path, mode="csv"):
@@ -36,8 +37,12 @@ def handle_queue(write_queue, write_path, mode="csv"):
         if file_name is None:  # Sentinel to terminate the worker
             break
 
+        # Create a subdirectory based on the current date
+        date_subdir = os.path.join(write_path, time.strftime("%d-%m-%Y"))
+        os.makedirs(date_subdir, exist_ok=True)
+
         # Write the file to disk
-        file_path = os.path.join(write_path, f"{file_name}.{mode}")
+        file_path = os.path.join(date_subdir, f"{file_name}.{mode}")
         print(f"[{mode}] Writing to file: {file_path}")
         try:
             with open(file_path, 'wb') as f:
